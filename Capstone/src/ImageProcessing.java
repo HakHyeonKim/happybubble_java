@@ -39,6 +39,7 @@ public class ImageProcessing
 	{
 		Mat mask = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 3), new Point(1, 1));
 		VideoCapture cap = new VideoCapture(0);
+		System.out.println("test");
 		
 		if(!cap.isOpened())	System.exit(-1);
 		colorFrame.setVisible(true);
