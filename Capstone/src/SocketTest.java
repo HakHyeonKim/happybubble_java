@@ -11,7 +11,7 @@ import javax.imageio.ImageIO;
 public class SocketTest {
 	public static final int port = 8765;
 	public static int[][] imgToArr = new int[200][200];
-	public static void main(String[] args) {
+	public SocketTest() {
 		ServerSocket serverSocket = null;
 		Socket socket = null;
 		try {
