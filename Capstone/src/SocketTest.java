@@ -17,8 +17,7 @@ public class SocketTest {
 		try {
 			serverSocket = new ServerSocket(port);
 			System.out.println("수신 대기 중");
-			socket = serverSocket.accept();       
-
+			socket = serverSocket.accept();
 			InputStream in = socket.getInputStream();
 			OutputStream out = socket.getOutputStream();
 			byte[] sizeArr = new byte[4];
