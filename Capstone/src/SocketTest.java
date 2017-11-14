@@ -28,7 +28,7 @@ public class SocketTest {
 			in.read(arrImg);
 			InputStream convertImgStream = new ByteArrayInputStream(arrImg);
 			BufferedImage bImg = ImageIO.read(convertImgStream);
-			File outputfile = new File("C:\\Users\\Administrator\\Desktop\\test.png");
+			File outputfile = new File("test.png");
 			ImageIO.write(bImg, "png", outputfile);
 			for(int i = 0;i < bImg.getWidth();i++) {
 				for(int j = 0;j < bImg.getHeight();j++) {
