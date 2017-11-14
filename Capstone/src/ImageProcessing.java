@@ -1,4 +1,3 @@
-
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.DMatch;
@@ -26,9 +25,7 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
 public class ImageProcessing
-{
-
-   
+{  
    static Mat video, blackVideo, binaryVideo, closedVideo, outputVideo, lableVideo, morphVideo;
    static Mat stat, centroid;
    static int w = 0;
@@ -38,6 +35,10 @@ public class ImageProcessing
    static int left_top = 0;
    static int right_top = 0;
    static int left_bottom = 0;
+   static final int countlen = 3;
+   static int size_set = 0;
+   static int[] count = new int[countlen];
+   static int[] discord = new int[5];
    //static int ret = 0;
    static int lablesNum = 0;
    static int matrixXSize = 200;
@@ -45,7 +46,7 @@ public class ImageProcessing
    static double[] data = null;
    static double[] dataVideo = null;
    static double[][] marker = new double[6][2];
-   static double[][] marker1 = new double[6][2];
+   static int[][] marker1 = new int[6][2];
    
    static VideoFrame colorFrame = new VideoFrame();
    static VideoFrame byteFrame = new VideoFrame();
@@ -137,13 +138,60 @@ public class ImageProcessing
     			 Imgproc.rectangle(video, new Point(left[0], top[0]), new Point(left[0] + width[0], top[0] + height[0]), new Scalar(255,0,0), 1);
 
     		 }
-    	 } 
-        
+    	 }
+    	 if(size_set == 0) {
+	    	 if (k == 2) {
+		    	 for(int i = 0; i < 3; i++) {
+		    		 int ret = 0;
+		    		 String filename = "C:\\images\\" + i + ".jpg";
+				     video.submat(roi[i]).copyTo(morphVideo);
+				 	 Size sz = new Size(500, 500);
+			    	 Imgproc.resize(morphVideo, morphVideo, sz);               	 
+			    	 ret = compareFeature(morphVideo, filename);
+			    	 if(ret == 0) {
+			    		 System.out.println("Two images are different." + "[" + i + "]" + " !!!!!!!!!!!!!!!!");
+			    	 }else {
+			    		 System.out.println("Two images are same." + "[" + i + "]" + " !!!!!!!!!!!!!!!!");
+			    		 marker1[i][0] = (int)marker[i][0];
+	    		 	 	 marker1[i][1] = (int)marker[i][1];
+	    		 	 	 count[i] = 1;
+			    	 }
+		    	 }
+	    	 }
+	    	
+			if(!video.empty() && !morphVideo.empty()) {
+			     colorFrame.render(video);
+			     byteFrame.render(morphVideo);
+			  }
+			else
+			     System.out.println("no frame"); 
+			 
+			if(count[0] == 1 && count[1] == 1 && count[2] == 1) {
+				if(marker1[0][0] > marker1[1][0]) {
+					marker1[0][0] = (int)marker[0][0];
+					marker1[0][1] = (int)marker[0][1];
+					marker1[1][0] = (int)marker[1][0];
+					marker1[1][1] = (int)marker[1][1];
+				}
+					
+				 System.out.println("Left Top : " + marker1[0][0] + " , " + marker1[0][1]);
+				 System.out.println("Right Top : " + marker1[1][0] + " , " + marker1[1][1]);
+				 System.out.println("Left Bot : " + marker1[2][0] + " , " + marker1[2][1]);
+				 size_set = 1;
+			}else {
+				 Arrays.fill(marker1[0], 0);
+				 Arrays.fill(marker1[1], 0);
+				 Arrays.fill(marker1[2], 0);
+				 Arrays.fill(count, 0);
+			}
+    	 }
+        /*
     	 int j = 0; 
     	 
     	 if(k == 2) {
-    		 for(int i = 0; i <= k; i++) {
-    			 
+    		 int check = 0;
+    		 for(int i = 0; i < count.length; i++) {
+        		 count[i]++;
     			 String filename = "C:\\images\\" + i + ".jpg";
                  
     			 for( j = 0; j <= k; j++) {
@@ -155,17 +203,30 @@ public class ImageProcessing
                 	 Imgproc.resize(morphVideo, morphVideo, sz);               	 
                 	 ret = compareFeature(morphVideo, filename);
                 	 
-                	 if (ret > 0) {
+                	 if (ret == 0 && count[i] < 10) {
+                		 check++;
+                		 System.out.println("count : " + count[i]);
+                		 System.out.println("check : " + check);
+                		 System.out.println("discord : " + discord[i]);
+                	 }
+                	 else if (count[i] == 9 && discord[i] <= 3) {
+                		 Arrays.fill(count, 0);
+                		 Arrays.fill(discord, 0);
         		 	 	 System.out.println("Two images are same." + "[" + i + "]" + " !!!!!!!!!!!!!!!!");
         		 	 	 marker1[i][0] = marker[i][0];
         		 	 	 marker1[i][1] = marker[i][1];
-        		 	 	 continue;
-        		 	 }else {
+        		 	 	 
+        		 	 } else if(count[i] == 9) {
+                		 Arrays.fill(count, 0);
+                		 Arrays.fill(discord, 0);
         		 	 	 System.out.println("Two images are different." + "[" + i + "]"																			 + " !");
-        		 	 	 break;
+        		 	 	 
         		 	 }
         		 }
-    			 if(j < k) break;    			 
+        		 if(check == k) {
+        			 discord[i]++;
+        			 check = 0;
+        		 }
     		 }
     	 }
     	 
@@ -177,35 +238,8 @@ public class ImageProcessing
           }
           else
              System.out.println("no frame");
-          
-    	 
-    	 /*
-        	 int i = 444;
-        	 int ret = 0;
-        	 
-        	 String filename = "C:\\images\\" + i + ".jpg";
-             
-        	 if(k >= 0) video.submat(roi[0]).copyTo(morphVideo);
-        	 
-        	 Size sz = new Size(500, 500);
-        	 Imgproc.resize(morphVideo, morphVideo, sz);
-        	 
-        	 ret = compareFeature(morphVideo, filename);
-        	 
-        	 if (ret > 0) {
-		 	 	 System.out.println("Two images are same." + i + " !!!!!!!!!!!!!!!!");
-		 	 	 continue;
-		 	 }else {
-		 	 	 System.out.println("Two images are different." + i + " !");
-		 	 }
-		 	 
-        	 try {
-            	 Thread.sleep(300);
-            	 }catch(InterruptedException e) {
-            		 System.out.println(e.getMessage());
-            	 }
-             */
-        	 
+          */
+    	     	 
         	 
 /*
          for(int i = 0; i <= k; i++) {
@@ -244,29 +278,6 @@ public class ImageProcessing
          }
         */ 
          
-         /*
-         for(int i = 0; i <= k; i++) {
-        	 String filename = "C:\\images\\" + i + ".jpg";
-             
-			 for(int j=0; j<=k; j++) {
-			     if(k >= 0) video.submat(roi[j]).copyTo(morphVideo);
-			     	 
-			 	 ret = compareFeature(morphVideo, filename);
-			     
-			  	 if (ret > 0) {
-			 	 	 System.out.println("Two images are same." + i + " !");
-			 	 	 continue;
-			 	 }else {
-			 	 	 System.out.println("Two images are different." + i + " !!!");
-			 	 }
-			 	 try {
-			 	 	 Thread.sleep(100);
-			 	 }catch(InterruptedException e) {
-			 	 	 System.out.println(e.getMessage());
-			 	 }
-			 }
-         }
-        */
         
          //if(k != 0)  video.submat(roi[0]).copyTo(morphVideo);
          
@@ -344,8 +355,8 @@ public class ImageProcessing
 	   
 	   // Match points of two images
 	   MatOfDMatch matches = new MatOfDMatch();
-	    System.out.println("Type of Image1= " + descriptors1.type() + ", Type of Image2= " + descriptors2.type());
-	    System.out.println("Cols of Image1= " + descriptors1.cols() + ", Cols of Image2= " + descriptors2.cols());
+	    //System.out.println("Type of Image1= " + descriptors1.type() + ", Type of Image2= " + descriptors2.type());
+	    //System.out.println("Cols of Image1= " + descriptors1.cols() + ", Cols of Image2= " + descriptors2.cols());
 	   
 	   // Avoid to assertion failed
 	   // Assertion failed (type == src2.type() && src1.cols == src2.cols && (type == CV_32F || type == CV_8U)
@@ -361,7 +372,7 @@ public class ImageProcessing
 			   if(dist < min_dist) min_dist = dist;
 			   if(dist > max_dist) max_dist = dist;
 		   }
-		   System.out.println("max_dist=" + max_dist + ", min_dist" + min_dist);
+		  // System.out.println("max_dist=" + max_dist + ", min_dist" + min_dist);
 		   
 		   // Extract good images (distances are under 10)
 		   for(int i= 0; i < descriptors1.rows(); i++) {
@@ -369,11 +380,11 @@ public class ImageProcessing
 				   retVal++;
 			   }
 		   }
-		   System.out.println("matching count+" + retVal);
+		   // System.out.println("matching count+" + retVal);
 	   }
 	   
 	   long estimatedTime = System.currentTimeMillis() - startTime;
-	   System.out.println("estimatedTime=" + estimatedTime + "ms");
+	   //System.out.println("estimatedTime=" + estimatedTime + "ms");
 	   
 	   return retVal;
 	   
