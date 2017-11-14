@@ -1,4 +1,4 @@
-public class Algorithm_random {
+public class Algorithm_random{
 	public static double[][][] send;
 	public static int se1 = 0, se2 = 0, se3 = 0;
 	public static P nextP;
@@ -8,40 +8,34 @@ public class Algorithm_random {
    public int[] save;
    public static double predegree = 0, movedegree;
    public static int[][] move = {
-         {1, 0}
-         , {0, 1}
-         , {-1, 0}
-         , {0, -1}
-         , {1, 1}
-         , {1, -1}
-         , {-1, -1}
-         , {-1, 1}};
-   public static int top = 0, i, j, g, h, mov;
-   public static int[][] input={
-            {1,1,1,1,1,1,1,1,1,1,1,},
-            {1,1,0,0,0,0,1,1,1,0,1},
-            {1,1,1,1,1,0,1,1,1,0,1},
-            {1,1,1,1,1,0,1,1,1,0,1},
-            {1,1,1,1,1,0,1,1,0,1,1},
-            {1,1,1,1,1,0,1,0,1,1,1},
-            {1,1,1,1,1,0,0,1,1,1,1},
-            {1,1,1,1,1,1,1,1,0,1,1},
-            {1,1,1,1,1,1,1,1,0,0,1},
-            {1,1,0,0,0,1,1,1,0,1,1},
-            {1,1,1,1,1,1,1,1,1,1,1}
-        };
+         {1, 0}//남
+         , {0, 1}//동
+         , {-1, 0}//북
+         , {0, -1}//서
+         , {1, 1}//남동
+         , {1, -1}//남서
+         , {-1, -1}//북서
+         , {-1, 1}};//북동
+   public static int top = 0, i, j, g=1, h=1, mov;
+   public static int[][] input;
    
    public static void main(String[] args) {
       // TODO Auto-generated method stub
    
+	  new SocketTest();
+	  input = SocketTest.getImgToArr();
+	   
       m = input.length;//행의 길이
       n = input[0].length;//열의 길이
-   
+      
+      System.out.println(m);
+      System.out.println(n);
+      
       //배열의 top pointer 용으로 쓸 행은 (m*2)(n*2)
         stack=new int[(m+2)*(n+2)][3];
         
         i = stack[0][0] = 1; //현재 위치 행
-        j = stack[0][1] = 5; //현재 위치 열
+        j = stack[0][1] = 1; //현재 위치 열
         stack[0][2] = 0; //마지막 움직인 방향
         mov = 0;
         
@@ -57,15 +51,16 @@ public class Algorithm_random {
       }
       
       System.out.println("최종");
+      
       for(int k = 0;k < input.length;k++) {
           for(int m = 0;m < input[0].length;m++)
              System.out.print(input[k][m] + " ");
           System.out.println("");
        }
        System.out.println("");
-   }
-   
-   public static int countloop() {
+}
+
+public static int countloop() {
 	   int count = 0;
 	   
 	   for(int a = 1; a < input.length-1; a++) {
@@ -142,13 +137,19 @@ public class Algorithm_random {
 	      
 	      i = g;
 	      j = h;
-	      
-	      
+	      /*
+	      try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+	      /*
 	      for(int k = 0;k < input.length;k++) {
 	         for(int m = 0;m < input[0].length;m++)
 	            System.out.print(input[k][m] + " ");
 	         System.out.println("");
-	      }
+	      }*/
 	      System.out.println("");
          
       }
