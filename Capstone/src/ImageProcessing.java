@@ -3,8 +3,8 @@ import org.opencv.core.CvType;
 import org.opencv.core.DMatch;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfDMatch;
-import org.opencv.core.MatOfFloat;
-import org.opencv.core.MatOfInt;
+//import org.opencv.core.MatOfFloat;
+//import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
@@ -15,10 +15,10 @@ import org.opencv.features2d.FeatureDetector;
 import org.opencv.imgcodecs.Imgcodecs;
 
 import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.List;
+//import java.util.ArrayList;
+//import java.util.List;
 
-import javax.rmi.CORBA.Util;
+//import javax.rmi.CORBA.Util;
 
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
@@ -69,6 +69,7 @@ public class ImageProcessing
       byteFrame.setVisible(true);
 
       while(true) {
+    	  do {
          video = new Mat();
          blackVideo = new Mat();
          binaryVideo = new Mat();
@@ -109,13 +110,14 @@ public class ImageProcessing
             }
          }
          lablesNum = Imgproc.connectedComponentsWithStats(morphVideo, lableVideo, stat, centroid, 8, CvType.CV_32S);
-         
+    	  }while(lablesNum <= 7);
+    	  
          Rect roi[] = new Rect[6];
          double[] range = new double[6];
          k = -1;
         
     	 for(int i = 0;i < lablesNum;i++) {
-    		 double[] area = stat.get(i, Imgproc.CC_STAT_AREA);
+    		// double[] area = stat.get(i, Imgproc.CC_STAT_AREA);
     		 double[] left = stat.get(i, Imgproc.CC_STAT_LEFT);
     		 double[] top = stat.get(i, Imgproc.CC_STAT_TOP);
     		 double[] width = stat.get(i, Imgproc.CC_STAT_WIDTH);
@@ -124,6 +126,7 @@ public class ImageProcessing
     		 double[] x = centroid.get(i, 0);
     		 double[] y = centroid.get(i, 1);
 
+    		 
     		 if((width[0] < 70 && width[0] > 25) && (height[0] < 70 && height[0] > 25)) {
     			 if(k <= 4	) {
     				k++;
@@ -144,7 +147,7 @@ public class ImageProcessing
     	 
     	 if(!video.empty() && !morphVideo.empty()) {
 		     colorFrame.render(video);
-		     byteFrame.render(morphVideo);
+		    // byteFrame.render(morphVideo);
 		  }
 		else
 		     System.out.println("no frame"); 
@@ -158,6 +161,9 @@ public class ImageProcessing
 				 	 Size sz = new Size(400, 400);
 			    	 Imgproc.resize(morphVideo, morphVideo, sz);               	 
 			    	 ret = compareFeature(morphVideo, filename);
+			    	 
+			    	 
+			    	 
 			    	 if(ret == 0) {
 			    		 System.out.println("Two images are different." + "[" + i + "]" + " !!!!!!!!!!!!!!!!");
 			    	 }else {
@@ -168,7 +174,7 @@ public class ImageProcessing
 			    	 }
 			    	 if(!video.empty() && !morphVideo.empty()) {
 					     colorFrame.render(video);
-					     byteFrame.render(morphVideo);
+					    // byteFrame.render(morphVideo);
 					  }
 					else
 					     System.out.println("no frame"); 
@@ -201,27 +207,7 @@ public class ImageProcessing
     	 
     	 if(size_set == 1 && k == 4) {
     		 {  
-    			 /*
-	    		 for(int i = 3; i<=4; i++) {
-	    			 int ret = 0;
-	    			 String filename = "C:\\images\\" + i + ".jpg";
-	    			 for(int j = 2; j <= 3; j++) {
-		    			 video.submat(roi[j]).copyTo(morphVideo);
-					 	 Size sz = new Size(400, 400);
-				    	 Imgproc.resize(morphVideo, morphVideo, sz);               	 
-				    	 ret = compareFeature(morphVideo, filename);
-				    	 if(ret == 0) {
-				    		 System.out.println("Two images are different." + "[" + i + "]" + " !!!!!!!!!!!!!!!!");
-				    	 }else {
-				    		 System.out.println("Two images are same." + "[" + i + "]" + " !!!!!!!!!!!!!!!!");
-				    		 marker1[i][0] = (int)marker[j][0];
-		    		 	 	 marker1[i][1] = (int)marker[j][1];
-		    		 	 	 count[i] = 1;
-		    		 	 	 ret = 0;
-				    	 }
-	    			 }
-	    		 }
-	    		 */
+    			 
     			 int ret = 0;
     			 int head_set = 0;
     			 String filename = "C:\\images\\" + 4 + ".jpg";
@@ -251,13 +237,11 @@ public class ImageProcessing
     			 
 	    		 if(!video.empty() && !morphVideo.empty()) {
 				     colorFrame.render(video);
-				     byteFrame.render(morphVideo);
+//				     byteFrame.render(morphVideo);
 				  }
 				else
 				     System.out.println("no frame"); 
 				 
-	    		 
-	    		 //if(count[3] == 1 && count[4] == 1) {
 	    		if(head_set == 1) {
 	    		 	 marker1[5][0] = (int)((marker1[3][0] + marker1[4][0])/2); // marker1[5] = car's center
 	    			 marker1[5][1] = (int)((marker1[3][1] + marker1[4][1])/2);
@@ -313,12 +297,12 @@ public class ImageProcessing
 	   Mat img1 = video;
 	   //Mat img1 = Imgcodecs.imread(video, Imgcodecs.CV_LOAD_IMAGE_COLOR);
 	   Mat img2 = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_COLOR);
-	   /*
+	/*   
        if(!img2.empty() && !img1.empty()) {
           colorFrame.render(img1);
           byteFrame.render(img2);
        }
-     */
+*/     
        
 	   // Declare key point of images
 	   MatOfKeyPoint keypoints1 = new MatOfKeyPoint();
@@ -340,6 +324,7 @@ public class ImageProcessing
 	   
 	   // Definition of descriptor matcher
 	   DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
+	  
 	   
 	   // Match points of two images
 	   MatOfDMatch matches = new MatOfDMatch();
@@ -371,75 +356,10 @@ public class ImageProcessing
 		   // System.out.println("matching count+" + retVal);
 	   }
 	   
-	   long estimatedTime = System.currentTimeMillis() - startTime;
+	   //long estimatedTime = System.currentTimeMillis() - startTime;
 	   //System.out.println("estimatedTime=" + estimatedTime + "ms");
 	   
 	   return retVal;
+   }
 	   
    }
-   
-   public static int compareHistogram(String filename1, String filename2) {
-	   int retVal = 0;
-	   
-	   long startTime = System.currentTimeMillis();
-	   
-	   Mat img1 = Imgcodecs.imread(filename1, Imgcodecs.CV_LOAD_IMAGE_COLOR);
-	   Mat img2 = Imgcodecs.imread(filename2, Imgcodecs.CV_LOAD_IMAGE_COLOR);
-	   
-	   if(!img2.empty() && !img1.empty()) {
-	          colorFrame.render(img1);
-	          byteFrame.render(img2);
-	       }
-	   
-	   Mat hsvImg1 = new Mat();
-	   Mat hsvImg2 = new Mat();
-	   
-	   Imgproc.cvtColor(img2, hsvImg2, Imgproc.COLOR_BGR2HSV);
-	   Imgproc.cvtColor(img2, hsvImg2, Imgproc.COLOR_BGR2HSV);
-	   
-	   List<Mat> listImg1 = new ArrayList<Mat>();
-	   List<Mat> listImg2 = new ArrayList<Mat>();
-	   
-	   listImg1.add(hsvImg1);
-	   listImg2.add(hsvImg2);
-	   
-	   MatOfFloat ranges = new MatOfFloat(0,255);
-	   MatOfInt histSize = new MatOfInt(50);
-	   MatOfInt channels = new MatOfInt(0);
-	   
-	   Mat histImg1 = new Mat();
-	   Mat histImg2 = new Mat();
-	   
-	   Imgproc.calcHist(listImg1, channels, new Mat(), histImg1, histSize, ranges);
-	   Imgproc.calcHist(listImg2, channels, new Mat(), histImg2, histSize, ranges);
-	   
-	   Core.normalize(histImg1, histImg1, 0, 1, Core.NORM_MINMAX, -1, new Mat());
-	   Core.normalize(histImg2, histImg2, 0, 1, Core.NORM_MINMAX, -1, new Mat());
-	   
-	   double result0, result1, result2, result3;
-	   result0 = Imgproc.compareHist(histImg1, histImg2, 0);
-	   result1 = Imgproc.compareHist(histImg1, histImg2, 1);
-	   result2 = Imgproc.compareHist(histImg1, histImg2, 2);
-	   result3 = Imgproc.compareHist(histImg1, histImg2, 3);
-	   
-	   System.out.println("Method [0] " + result0);
-	   System.out.println("Method [1] " + result1);
-	   System.out.println("Method [2] " + result2);
-	   System.out.println("Method [3] " + result3);
-	   
-	   int count=0;
-	   if (result0 > 0.9) count++;
-	   if (result1 > 0.1) count++;
-	   if (result2 > 1.5) count++;
-	   if (result3 > 0.3) count++;
-	   
-	   if (count >= 3) retVal = 1;
-	   
-	   long estimatedTime = System.currentTimeMillis() - startTime;
-	   System.out.println("estimatedTime=" + estimatedTime + "ms");
-	   
-	   return retVal;
-   }
-
-   
-}
