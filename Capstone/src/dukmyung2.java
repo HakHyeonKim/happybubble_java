@@ -74,7 +74,6 @@ public class dukmyung2 {
 	    // 길 다찾고 최종 경로 출력 부분 각도가 +일때 오른쪽으로 회전 -일때 왼쪽으로 ,, 회전 펜 up은 1 down은 0
 	 System.out.println("*Start*");
 	 	mArrayList.add("*End*");
-	 //System.out.println(mArrayList);
      for(int i = 0; i < mArrayList.size(); i++) {
          int count = 0;
          while(mArrayList.get(i).equals("W1-")) {
