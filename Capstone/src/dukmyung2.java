@@ -10,10 +10,10 @@ import java.util.Scanner;
 import java.text.NumberFormat;
 
 public class dukmyung2 {
-   public static ArrayList<String> mArrayList;
+   public static ArrayList<String> mArrayList = new ArrayList<String>();
    public static int m, n;
-   public static int[][] log = new int[3][27];
-   public static int a=0; static int b=0; static int c=0; static int pen=0;
+   public static int pen = 0;
+   public static int tempDist = 0;
    public static int[][] mark;
    public static int[][] stack;
    public int[] save;
@@ -70,26 +70,21 @@ public class dukmyung2 {
                 }
             }
       }
-      	mArrayList = new ArrayList<String>();
-      	// 0도가 지속 될 경우 거리만 합산
 
 	    // 길 다찾고 최종 경로 출력 부분 각도가 +일때 오른쪽으로 회전 -일때 왼쪽으로 ,, 회전 펜 up은 1 down은 0
-	    System.out.println("최종 경로");
-
-   	   	for(int w=0; w<log[1].length; w++){
-   	      if(log[1][w] == 0 && log[1][w-1] == 0){
-   	    	  int temp[];
-   		      log[0][w] += log[0][w-1];
-   	      }
-   	      if(log[1][w] < 0){
-   	    	mArrayList.add("L" + Math.abs(log[1][w]));
-   	      }
-   	      else {
-   	    	mArrayList.add("R" + log[1][w]);
-   	      }
-   	      	mArrayList.add("W" + log[0][w]);
-   	      	mArrayList.add("Z" + log[2][w]+ "-");
-	    }
+	 System.out.println("*Start*");
+	 	mArrayList.add("*End*");
+	 //System.out.println(mArrayList);
+     for(int i = 0; i < mArrayList.size(); i++) {
+         int count = 0;
+         while(mArrayList.get(i).equals("W1-")) {
+        	  mArrayList.remove(i);
+             count++;
+             if(!mArrayList.get(i).equals("W1-")){
+            	 mArrayList.add(i, "Z0-"+ "W" + count +'-'); 
+             }
+         }
+     }
 
    	 String LastOutput = mArrayList.toString();
    	 String LastOutput2;
@@ -100,11 +95,11 @@ public class dukmyung2 {
    	 String date[] = LastOutput2.split("-");
      
      for(int i=0 ; i< date.length ; i++)
-     {
-         System.out.println(date[i]);
+     {		 
+	    	 	System.out.println(date[i]);
      }
-
    }
+  
    
    public static void minDistance(){
       ArrayList<P> points = new ArrayList<P>();
@@ -140,7 +135,7 @@ public class dukmyung2 {
         double Movedegree = getAngle(i,j,g,h);
         System.out.println("거라: " + (int)min + "  각도: " + (int)Movedegree);
         pen = 1;
-        arrayOutput(min, Movedegree, pen);
+        arrayOutput((int)min, (int)Movedegree, pen);
         pen = 0;
         System.out.println();
       
@@ -165,13 +160,15 @@ public class dukmyung2 {
       P points = new P(g, h);
       double dist = distance(startP,points);
       System.out.println("dist:" + dist);
-       
-         
+ 
       degree = getAngle(i,j,g,h);
            
       System.out.println(degree+"도");
       
-      arrayOutput(dist, degree, pen);
+      int distanc = (int)dist;
+      int degrees = (int)degree;  
+      
+      arrayOutput(distanc, degrees, pen);
       
       i = g;
       j = h;
@@ -180,28 +177,31 @@ public class dukmyung2 {
          for(int m = 0;m < input[0].length;m++)
             System.out.print(input[k][m] + " ");
          System.out.println("");
-      }
+      }    
+
       System.out.println("");
    }
    
-   public static void arrayOutput(double dist, double degree, int pen){
-	   
-	      log[0][a] = (int)dist;
-	      a++;
-	      log[1][b] = (int)degree;
-	      b++;
-	      log[2][c] = pen;
-	      c++;
+   public static void arrayOutput(int dist, int degree, int pen){
 	      
-	      for(i=0; i<log.length; i++){
-	    	  System.out.println();
-	    	  for(j=0; j<log[i].length; j++){
-	    	  System.out.print(log[i][j]+ " ");
+	      if(degree < 0){
+	      mArrayList.add("Z" + String.valueOf(pen)+"-");
+	      mArrayList.add("L" + String.valueOf(Math.abs(degree))+"-"); 
+	      mArrayList.add("W" + String.valueOf(dist)+"-");
 	      }
-	   }
-	    	  System.out.println();
-	    	  System.out.println();	      
-   }
+	      if(degree > 0){
+	      mArrayList.add("Z" + String.valueOf(pen)+"-");
+	      mArrayList.add("R" + String.valueOf(degree)+"-"); 
+	      mArrayList.add("W" + String.valueOf(dist)+"-");
+	      }
+	
+	      if(degree == 0){
+	    	  mArrayList.add("W" + String.valueOf(dist)+"-");
+	      }
+	      
+	      System.out.println(mArrayList);
+	      }
+   
    
    public static void MovePath(int col, int row){
       int movedirect = 0;
