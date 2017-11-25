@@ -8,9 +8,14 @@ import java.net.Socket;
 
 import javax.imageio.ImageIO;
 
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+
 public class SocketTest {
 	public static final int port = 8765;
 	public static int[][] imgToArr = new int[200][200];
+	Mat convertMat;
+
 	public SocketTest() {
 		ServerSocket serverSocket = null;
 		Socket socket = null;
@@ -30,15 +35,16 @@ public class SocketTest {
 			BufferedImage bImg = ImageIO.read(convertImgStream);
 			File outputfile = new File("test.png");
 			ImageIO.write(bImg, "png", outputfile);
+			
 			for(int i = 0;i < bImg.getWidth();i++) {
 				for(int j = 0;j < bImg.getHeight();j++) {
 					if (bImg.getRGB(i, j) == -1) {
-						imgToArr[i][j] = 0;
-						System.out.print("0 ");
+						imgToArr[i][j] = 9;
+						System.out.print("1 ");
 					}
 					else {
-						imgToArr[i][j] = 1;
-						System.out.print("1 ");
+						imgToArr[i][j] = 0;
+						System.out.print("0 ");
 					}
 				}
 				System.out.println("");
@@ -75,7 +81,7 @@ public class SocketTest {
 
 	    return ((s1 << 24) + (s2 << 16) + (s3 << 8) + (s4 << 0));
 	}
-	
+
 	public static int[][] getImgToArr() {
 		return imgToArr;
 	}
