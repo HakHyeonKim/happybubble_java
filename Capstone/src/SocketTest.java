@@ -13,7 +13,7 @@ import org.opencv.core.Mat;
 
 public class SocketTest {
 	public static final int port = 8765;
-	public static int[][] imgToArr = new int[200][200];
+	public static int[][] imgToArr;
 	Mat convertMat;
 
 	public SocketTest() {
@@ -36,6 +36,7 @@ public class SocketTest {
 			File outputfile = new File("test.png");
 			ImageIO.write(bImg, "png", outputfile);
 			
+			imgToArr = new int[bImg.getWidth()][bImg.getHeight()];
 			for(int i = 0;i < bImg.getWidth();i++) {
 				for(int j = 0;j < bImg.getHeight();j++) {
 					if (bImg.getRGB(i, j) == -1) {
