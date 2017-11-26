@@ -206,56 +206,56 @@ public class ImageProcessing
     	 Arrays.fill(count, 0);
     	 
     	 if(size_set == 1 && k == 4) {
-    		 {  
+    		   
     			 
-    			 int ret = 0;
-    			 int head_set = 0;
-    			 String filename = "C:\\images\\" + 4 + ".jpg";
-	    		 
-    			 for(int j = 2; j <= 3; j++) {
-	    			 video.submat(roi[j]).copyTo(morphVideo);
-				 	 Size sz = new Size(400, 400);
-			    	 Imgproc.resize(morphVideo, morphVideo, sz);               	 
-			    	 ret = compareFeature(morphVideo, filename);
-			    	 if(ret == 0) {
-			    		 System.out.println("Two images are different." + "[" + j + "]" + " !!!!!!!!!!!!!!!!");
-			    	 }else {
-			    		 System.out.println("Two images are same." + "[" + j + "]" + " !!!!!!!!!!!!!!!!");
-			    		 marker1[3][0] = (int)marker[j][0];
-	    		 	 	 marker1[3][1] = (int)marker[j][1];
-	    		 	 	 if(j == 2) {
-	    		 	 		marker1[4][0] = (int)marker[3][0];
-	    		 	 		marker1[4][1] = (int)marker[3][1];
-	    		 	 	 } else {
-	    		 	 		marker1[4][0] = (int)marker[2][0];
-	    		 	 		marker1[4][1] = (int)marker[2][1];
-	    		 	 	 }
-	    		 	 	 head_set++;
-	    		 	 	 ret = 0;
-			    	 }
-    			 }
-    			 
-	    		 if(!video.empty() && !morphVideo.empty()) {
-				     colorFrame.render(video);
+			 int ret = 0;
+			 int head_set = 0;
+			 String filename = "C:\\images\\" + 4 + ".jpg";
+    		 
+			 for(int j = 2; j <= 3; j++) {
+    			 video.submat(roi[j]).copyTo(morphVideo);
+			 	 Size sz = new Size(400, 400);
+		    	 Imgproc.resize(morphVideo, morphVideo, sz);               	 
+		    	 ret = compareFeature(morphVideo, filename);
+		    	 if(ret == 0) {
+		    		 System.out.println("Two images are different." + "[" + j + "]" + " !!!!!!!!!!!!!!!!");
+		    	 }else {
+		    		 System.out.println("Two images are same." + "[" + j + "]" + " !!!!!!!!!!!!!!!!");
+		    		 marker1[3][0] = (int)marker[j][0];
+    		 	 	 marker1[3][1] = (int)marker[j][1];
+    		 	 	 if(j == 2) {
+    		 	 		marker1[4][0] = (int)marker[3][0];
+    		 	 		marker1[4][1] = (int)marker[3][1];
+    		 	 	 } else {
+    		 	 		marker1[4][0] = (int)marker[2][0];
+    		 	 		marker1[4][1] = (int)marker[2][1];
+    		 	 	 }
+    		 	 	 head_set++;
+    		 	 	 ret = 0;
+		    	 }
+			 }
+			 
+    		 if(!video.empty() && !morphVideo.empty()) {
+			     colorFrame.render(video);
 //				     byteFrame.render(morphVideo);
-				  }
-				else
-				     System.out.println("no frame"); 
-				 
-	    		if(head_set == 1) {
-	    		 	 marker1[5][0] = (int)((marker1[3][0] + marker1[4][0])/2); // marker1[5] = car's center
-	    			 marker1[5][1] = (int)((marker1[3][1] + marker1[4][1])/2);
-	    			 angle = (int)getAngle(marker1);
-	    			 System.out.println("Head : " + marker1[3][0] + " , " + marker1[3][1]);
-					 System.out.println("Tail : " + marker1[4][0] + " , " + marker1[4][1]);
-					 System.out.println("Center : " + marker1[5][0] + " , " + marker1[5][1]);
-					 System.out.println("Angle : " + angle);
-	    		 } else {
-	    			 Arrays.fill(marker1[3], 0);
-					 Arrays.fill(marker1[4], 0);
-					 Arrays.fill(count, 0);
-	    		 }
-	    	 }
+			  }
+			else
+			     System.out.println("no frame"); 
+			 
+    		if(head_set == 1) {
+    		 	 marker1[5][0] = (int)((marker1[3][0] + marker1[4][0])/2); // marker1[5] = car's center
+    			 marker1[5][1] = (int)((marker1[3][1] + marker1[4][1])/2);
+    			 angle = (int)getAngle(marker1);
+    			 System.out.println("Head : " + marker1[3][0] + " , " + marker1[3][1]);
+				 System.out.println("Tail : " + marker1[4][0] + " , " + marker1[4][1]);
+				 System.out.println("Center : " + marker1[5][0] + " , " + marker1[5][1]);
+				 System.out.println("Angle : " + angle);
+    		 } else {
+    			 Arrays.fill(marker1[3], 0);
+				 Arrays.fill(marker1[4], 0);
+				 Arrays.fill(count, 0);
+    		 }
+    	 
     	 }
   /*
         	 try {
