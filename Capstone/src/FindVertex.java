@@ -24,18 +24,17 @@ public class FindVertex {
 
 	   static VideoFrame vertexFrame = new VideoFrame();
 	   static {
-	      String opencvPath = "C:\\opencv330\\build\\java\\x64\\";
+	      String opencvPath = "C:\\opencv\\build\\java\\x64\\";
 	      System.load( opencvPath + Core.NATIVE_LIBRARY_NAME + ".dll" );
 	   }
-	   final static int[] intPattern = {1, 2, 3, 4, 5, 6, 7};
+	   static int intPattern = 1;
 
-	   public static void main(String[] args) {
-		   SocketTest socket = new SocketTest();
-		   int[][] imgArr = socket.getImgToArr();
+	   public static int[][] pattern(int[][] input) {
+		   int[][] imgArr = input;
 		   Mat vertexImg = Imgcodecs.imread("test.png");
 		   Mat tempImg = new Mat();
 		   MatOfPoint approxTemp = new MatOfPoint();
-		   int patternIdx = 0;
+		   //int patternIdx = 0;
 		   while(true) {
 			   Imgproc.cvtColor(vertexImg, tempImg, Imgproc.COLOR_BGR2GRAY);
 			   Imgproc.threshold(tempImg, tempImg, 200, 255, Imgproc.THRESH_OTSU | Imgproc.THRESH_BINARY);
@@ -52,14 +51,16 @@ public class FindVertex {
 		
 					   xy[0] = Integer.parseInt(splitTemp[0].replaceAll("[^0-9]", ""));
 					   xy[1] = Integer.parseInt(splitTemp[1].replaceAll("[^0-9]", ""));
-					   imgArr[xy[0]][xy[1]] = intPattern[patternIdx];
+					   imgArr[xy[0]][xy[1]] = intPattern;
 					   //System.out.println("ÁÂÇ¥ : (" + replaceTemp[0] + "," + replaceTemp[1] + ")");
 					   //Imgproc.circle(vertexImg, new Point(Integer.parseInt(replaceTemp[0]),Integer.parseInt(replaceTemp[1])), -1, new Scalar(0,0,0));
 				   }
 				   Imgproc.drawContours(vertexImg, contours, i, new Scalar(0, 0, 0), 2);
 			   }
-			   if(patternIdx == intPattern.length - 1)	patternIdx = 0;
-			   else patternIdx++;
+			   intPattern++;
+			   if(intPattern == 9) 
+				   intPattern++;
+			   //patternIdx++;
 		   }
 		   
 		   for(int i = 0;i < imgArr.length;i++) {
@@ -70,5 +71,7 @@ public class FindVertex {
 		   }
 		   vertexFrame.setVisible(true);
 		   vertexFrame.render(vertexImg);
+		   
+		   return imgArr;
 	   }
 }
