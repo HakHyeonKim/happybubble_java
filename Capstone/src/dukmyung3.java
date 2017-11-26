@@ -1,4 +1,4 @@
-
+//수정본
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,9 +9,8 @@ import java.util.Scanner;
 
 import java.text.NumberFormat;
 
-public class dukmyung2 {
+public class dukmyung3 {
    public static ArrayList<String> mArrayList = new ArrayList<String>();
-   public static int recur = 0;
    public static int m, n;
    public static int pen = 0;
    public static int tempDist = 0;
@@ -31,15 +30,15 @@ public class dukmyung2 {
    public static int top = 0, i, j, g, h, mov;
    public static int[][] input={
             {1,1,1,1,1,1,1,1,1,1,1},
-            {1,0,1,1,0,1,1,0,1,1,1},
-            {1,0,1,1,0,1,1,0,1,1,1},
-            {1,0,1,1,0,1,1,1,1,1,1},
-            {1,0,0,0,0,1,1,0,1,1,1},
-            {1,0,1,1,0,1,1,0,1,1,1},
-            {1,0,1,1,0,1,1,0,1,1,1},
-            {1,0,1,1,0,1,1,0,1,1,1},
-            {1,0,1,1,0,1,1,0,1,1,1},
-            {1,0,1,1,0,1,1,0,1,1,1},
+            {1,1,1,1,0,0,0,0,1,1,1},
+            {1,1,1,0,1,1,1,1,0,1,1},
+            {1,1,0,1,1,1,1,1,1,0,1},
+            {1,1,0,1,1,1,1,1,1,0,1},
+            {1,1,0,1,1,1,1,1,1,0,1},
+            {1,1,0,1,1,1,1,1,1,0,1},
+            {1,1,0,1,1,1,1,1,1,0,1},
+            {1,1,1,0,1,1,1,1,0,1,1},
+            {1,1,1,1,0,0,0,0,1,1,1},
             {1,1,1,1,1,1,1,1,1,1,1},
         };
    
@@ -104,7 +103,7 @@ public class dukmyung2 {
    public static void minDistance(){
       ArrayList<P> points = new ArrayList<P>();
       P[] temp = {new P(1, 1), new P(1, 4), new P(1, 9), new P(4, 1), new P(4, 4), new P(4, 9), new P(1, 7), new P(4, 7), new P(9, 7)};
-      P StartP = new P(g, h);
+      P StartP = new P(i,j);
       System.out.println("시작 좌표값:" + StartP);
       double min = 0;
       
@@ -132,7 +131,7 @@ public class dukmyung2 {
         System.out.println("최소  dist: "+ min + "  " + "point : " + minP);
         System.out.println("");
         System.out.println("펜을 들고("+(int)StartP.x+","+(int)StartP.y+") > ("+(int)minP.x+","+(int)minP.y+")로 이동");
-        double Movedegree = getAngle(i,j,g,h);
+        double Movedegree = getAngle((int)StartP.x,(int)StartP.y,(int)minP.x, (int)minP.y);
         System.out.println("거라: " + (int)min + "  각도: " + (int)Movedegree);
         pen = 1;
         arrayOutput((int)min, (int)Movedegree, pen);
@@ -154,10 +153,6 @@ public class dukmyung2 {
       g = col + move[direct][0];
       h = row + move[direct][1];
       
-      if(recur == 1){
-    	  g--; h--;
-      }
-
       System.out.println("("+i+","+j+") > ("+g+","+h+")");
       
       P startP = new P(i, j);
@@ -170,7 +165,7 @@ public class dukmyung2 {
       System.out.println(degree+"도");
       
       int distanc = (int)dist;
-      int degrees = (int)degree; 
+      int degrees = (int)degree;  
       
       arrayOutput(distanc, degrees, pen);
       
@@ -269,7 +264,8 @@ public class dukmyung2 {
    }
    
    private static double getAngle(int x1,int y1, int x2,int y2){
-      double dx = x2 - x1;
+
+	  double dx = x2 - x1;
       double dy = y2 - y1;
       
       double rad= Math.atan2(dx, dy);   
@@ -277,8 +273,11 @@ public class dukmyung2 {
       
       double Movedegree = degree - predegree;
       
-      predegree = degree;   
+      predegree = degree;
       
+      if(Math.abs(Movedegree) > 180){
+    	  Movedegree = 360 - Math.abs(Movedegree);
+      }
       
       return Movedegree;
       }
