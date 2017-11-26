@@ -103,7 +103,7 @@ public class dukmyung3 {
    public static void minDistance(){
       ArrayList<P> points = new ArrayList<P>();
       P[] temp = {new P(1, 1), new P(1, 4), new P(1, 9), new P(4, 1), new P(4, 4), new P(4, 9), new P(1, 7), new P(4, 7), new P(9, 7)};
-      P StartP = new P(1,1);
+      P StartP = new P(i,j);
       System.out.println("시작 좌표값:" + StartP);
       double min = 0;
       
