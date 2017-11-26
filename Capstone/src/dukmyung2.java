@@ -11,6 +11,7 @@ import java.text.NumberFormat;
 
 public class dukmyung2 {
    public static ArrayList<String> mArrayList = new ArrayList<String>();
+   public static int recur = 0;
    public static int m, n;
    public static int pen = 0;
    public static int tempDist = 0;
@@ -153,6 +154,10 @@ public class dukmyung2 {
       g = col + move[direct][0];
       h = row + move[direct][1];
       
+      if(recur == 1){
+    	  g--; h--;
+      }
+
       System.out.println("("+i+","+j+") > ("+g+","+h+")");
       
       P startP = new P(i, j);
@@ -165,7 +170,7 @@ public class dukmyung2 {
       System.out.println(degree+"µµ");
       
       int distanc = (int)dist;
-      int degrees = (int)degree;  
+      int degrees = (int)degree; 
       
       arrayOutput(distanc, degrees, pen);
       
