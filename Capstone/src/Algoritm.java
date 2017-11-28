@@ -1,68 +1,141 @@
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
 //혼합 자바
 
 public class Algoritm extends SocketTest{
-	public static double[][][] send;
-	public static int se1 = 0, se2 = 0, se3 = 0;
+	public static ArrayList<Integer> penList = new ArrayList<Integer>();
+	public static ArrayList<P> Points = new ArrayList<P>();
+	public static ArrayList<Double> AngleList = new ArrayList<Double>();
+	
+	public static ArrayList<Integer> pathList = new ArrayList<Integer>();
+	public static int se1 = 0, se2 = 0, se3 = 0, pen = 0;
 	public static P nextP;
-   public static int m, n, count = 0;
-   public static int[][] mark;
-   public static int[][] stack;
-   public int[] save;
-   public static double predegree = 0, movedegree;
-   public static boolean control = true;
-   public static int check_path = 0, change = 0;
-   public static int[][] move = {
-         {1, 0}
-         , {0, 1}
-         , {-1, 0}
-         , {0, -1}
-         , {1, 1}
-         , {1, -1}
-         , {-1, -1}
-         , {-1, 1}};
-   public static int top = 0, i, j, g, h, mov;
-   public static int[][] input;
-   public static void main(String[] args) {
-      // TODO Auto-generated method stub
+	public static int m, n, count = 0;
+	public static int[][] mark;
+	public static int[][] stack;
+	public int[] save;
+	public static double predegree = 0, movedegree;
+	public static boolean control = true;
+	public static int check_path = 0, change = 0;
+	public static int[][] move = {
+		{1, 0}
+		, {0, 1}
+		, {-1, 0}
+        , {0, -1}
+        , {1, 1}
+        , {1, -1}
+        , {-1, -1}
+        , {-1, 1}};
+	public static int top = 0, i, j, g, h, mov;
+	public static int[][] input;
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
 	   
-	   new SocketTest();
+		new SocketTest();
 	   
-	   input = FindVertex.pattern(SocketTest.getImgToArr());
+		input = FindVertex.pattern(SocketTest.getImgToArr());
 	   
-	   i = 5;
-	   j = 1;
-	   g = i;
-	   h = j;
+		Dimension dim = new Dimension(1600, 1000);
+		
+		JFrame frame = new JFrame();
+		frame.setLocation(0, 0);
+		frame.setPreferredSize(dim);
 	   
-	   while(control) {
-		   int finish_check = 0;
-		   check_path++;
-		   if(check_path == 9)
-			   check_path++;
-		   start(i, j, check_path);
+		i = 5;
+		j = 1;
+		g = i;
+		h = j;
+	   
+		pathList.add(pen);
+		pathList.add(i);
+		pathList.add(j);
+	   
+		while(control) {
+			int finish_check = 0;
+			check_path++;
+			if(check_path == 9)
+				check_path++;
+			start(i, j, check_path);
 		  
-		   for(int a = 1; a < input.length-1; a++) {
-			   for(int b = 1; b < input[0].length-1; b++) {
-				   if(input[a][b] != 0 && input[a][b] != 9) {
-					   finish_check++;
-				   }
-			   }    
-		   }
+			for(int a = 1; a < input.length-1; a++) {
+				for(int b = 1; b < input[0].length-1; b++) {
+					if(input[a][b] != 0 && input[a][b] != 9) {
+						finish_check++;
+					}
+				}    
+			}
+			
+			
+			for(int a = 0; a< AngleList.size()-1; a++){
+				double angle = AngleList.get(a);
+				double preAngle = AngleList.get(a + 1);
+				//System.out.println(angle + " / " + preAngle);
+				if(angle == preAngle){
+					penList.remove(a);
+					Points.remove(a);
+					AngleList.remove(a);
+					a--;
+				}
+			}
+		
+	        /*   String LastOutput = mArrayList.toString();
+	           String LastOutput2;
+	           LastOutput2 = LastOutput.replace("[", "");
+	           LastOutput2 = LastOutput2.replace("]", "");
+	           LastOutput2 = LastOutput2.replace(", ", "");
+	             
+	             String date[] = LastOutput2.split("-");
+	             
+	             for(int i=0 ; i< date.length ; i++)
+	             {       
+	                      System.out.println(date[i]);
+	             }
+	             
+	              System.out.println(pathList);
+		   */
 		   if(finish_check == 0) {
 			   control = false;
 		   }
 	   }
-	   
+		HashMap<String, Object> test = new HashMap<>();
+		test.put("pen", penList);
+		test.put("Point", Points);
+		test.put("Angle", AngleList );
+		
+		System.out.println(test.get("pen"));
+		System.out.println(test.get("Point"));
+		System.out.println(test.get("Angle"));
+          
       System.out.println("최종");
+      /*
       for(int k = 0;k < input.length;k++) {
           for(int m = 0;m < input[0].length;m++)
              System.out.print(input[k][m] + " ");
           System.out.println("");
        }
-       System.out.println("");
-   }
+       System.out.println("");*/
+      /*
+      System.out.println(pathList);
+      */
+    Draw draw = new Draw();
+    frame.add(draw);
+   	frame.pack();
+  	frame.setVisible(true);
+  
    
-   public static void start(int x, int y, int check_path) {
+   	}
+	public static ArrayList<Integer> getPathList() {
+		return pathList;
+	}
+   
+	public static void start(int x, int y, int check_path) {
 	      m = input.length;//행의 길이
 	      n = input[0].length;//열의 길이
 	   
@@ -126,6 +199,13 @@ public static int countloop(int check_path) {
        System.out.println("최소  dist: "+ Math.round(min) + "   각도 : "+ getangle + "도");
        System.out.println("펜을 들고("+(int)StartP.x+","+(int)StartP.y+") > ("+(int)nextP.x+","+(int)nextP.y+")로 이동");
        System.out.println("");*/
+       
+       P pointA = new P(nextP.x, nextP.y);
+       pen = 1;
+       arrayOutput(pen, pointA, getangle);
+       pathOutput((int)nextP.x, (int)nextP.y, pen);
+       pen = 0;
+       
        i = (int)nextP.x;
        j = (int)nextP.y;
        MovePath(i, j, check_path);
@@ -134,6 +214,18 @@ public static int countloop(int check_path) {
     static double distance(P p1, P p2) {
         return p1.distance(p2);
     }
+    
+    public static void pathOutput(int cal, int row, int pen){
+        pathList.add(pen);
+        pathList.add(cal);
+        pathList.add(row);      
+     }
+    
+    public static void arrayOutput(int pen, P point, double degree){
+    	penList .add(pen);
+    	Points.add(point);
+    	AngleList.add(degree);
+  }
     
    public static void DirectionCheck(int col, int row, int direct, int c) {
       double newdegree;
@@ -159,14 +251,17 @@ public static int countloop(int check_path) {
           }
          
 	      System.out.println("("+i+","+j+") > ("+g+","+h+")");*/
-	      
+          pathOutput(g, h, pen);
+          
 	      P startP = new P(i, j);
 	      P points = new P(g, h);
 	         
 	      newdegree = getAngle(i,j,g,h);
-	      /*
-	      System.out.println(newdegree+"도");
-	      */
+	      
+	      //System.out.println(newdegree+"도");
+	      P pointB = new P(g,h);
+	      arrayOutput(pen, pointB, newdegree);
+	      
 	      i = g;
 	      j = h;
 	      
@@ -183,6 +278,7 @@ public static int countloop(int check_path) {
    
    public static void MovePath(int col, int row, int checkpath){
       int movedirect = 0;
+      pen = 0;
       
       if(input[col][row] == checkpath && input[col+1][row] != checkpath && input[col][row+1] != checkpath
     		  && input[col+1][row+1] != checkpath && input[col-1][row] != checkpath && input[col][row-1] != checkpath
@@ -255,6 +351,7 @@ public static int countloop(int check_path) {
          DirectionCheck(col, row, movedirect, 0);
          MovePath(i, j, checkpath);
       }
+      pen = 1;
    }
    
    private static double getAngle(int x1,int y1, int x2,int y2){
@@ -263,11 +360,9 @@ public static int countloop(int check_path) {
       
       double rad= Math.atan2(dx, dy);
       double degree = (rad*180)/Math.PI ;
-         
-      movedegree = degree - predegree;
       
-      predegree = degree;
+      degree = Math.round(degree*1000)/1000.0;
       
-      return Math.round(movedegree);
+      return degree;
    }
 }
