@@ -1,30 +1,55 @@
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
+import java.awt.event.*;
 import java.util.ArrayList;
+import java.awt.*;
+import javax.swing.*;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+public class Draw extends JPanel implements ActionListener {
 
-public class Draw extends JPanel{
 	public static ArrayList<Integer> list = new ArrayList<Integer>();
-	public static int i = 6;
-	@Override
+
+	Timer time = new Timer(50, (ActionListener) this);
+	int a = 0;
+	int b = 3;
+	int s = 5;
+	int size = 0;
+	
+	public void animateLine(Graphics2D g2d) {
+		list = Algoritm.getPathList();
+		if (b == 3)
+			size = list.size();
+		//System.out.println(b);
+		if (b < size)
+			b += 3;
+		
+		for (a = 0; a < b; a += 3) {
+
+			if (list.get(a + 3) == 0) {
+				g2d.setColor(Color.black);
+				g2d.drawLine(list.get(a + 1) * s, list.get(a + 2) * s, list.get(a + 4) * s, list.get(a + 5) * s);
+				time.start();
+			}
+
+			else if (list.get(a + 3) != 0) {
+				g2d.setColor(Color.red);
+				g2d.drawLine(list.get(a + 1) * s, list.get(a + 2) * s, list.get(a + 4) * s, list.get(a + 5) * s);
+				time.start();
+			}
+			if(b == size)
+				time.stop();
+		}
+	}
+
+	public void actionPerformed(ActionEvent arg0) {
+		repaint();
+		//System.out.println("그리는중");
+		System.out.println(b);
+		if(b == size -3)System.out.println("그리기 완료");
+		System.out.println(b);
+	}
+	
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		
-		list = Algoritm.getPathList();
-		
-		for(int a = 0; a < list.size()-4; a += 3) {
-			if(list.get(a+3) == 0) {
-				g.setColor(Color.black);
-				g.drawLine(list.get(a+1)*i, list.get(a+2)*i, list.get(a+4)*i, list.get(a+5)*i);
-			}
-			
-			else if(list.get(a+3) != 0){
-				g.setColor(Color.red);
-				g.drawLine(list.get(a+1)*i, list.get(a+2)*i, list.get(a+4)*i, list.get(a+5)*i);
-			}
-		}
+		Graphics2D g2d = (Graphics2D) g;
+		animateLine(g2d);
 	}
 }
