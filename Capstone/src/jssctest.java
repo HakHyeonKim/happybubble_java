@@ -1,31 +1,15 @@
 import jssc.SerialPort;
-import jssc.SerialPortEvent;
-import jssc.SerialPortEventListener;
-import jssc.SerialPortException;
-//import gnu.io.CommPort;
-//import gnu.io.CommPortIdentifier;
-
-import java.io.FileDescriptor;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
-
-import javax.swing.plaf.synth.SynthSeparatorUI;
-
-import jssc.SerialPort;
 import jssc.SerialPortList;
 
 public class jssctest {
 	static String order;
 	Thread write;
-	static SerialPort serialPort = new SerialPort("COM7");
+	static SerialPort serialPort = new SerialPort("COM3");
 
 	public void jssc() throws Exception {
 
 		String[] portNames = SerialPortList.getPortNames();
+		
 		for (int i = 0; i < portNames.length; i++) {
 			System.out.println(portNames[i]);
 		}
@@ -33,7 +17,6 @@ public class jssctest {
 		serialPort.setParams(SerialPort.BAUDRATE_9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1,
 				SerialPort.PARITY_NONE);
 		new ReadThread(serialPort).start();
-
 	}
 
 	public void getOrder(String order) {

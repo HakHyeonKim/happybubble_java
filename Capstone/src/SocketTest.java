@@ -1,15 +1,13 @@
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.net.Socket;
+import java.util.Arrays;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.Arrays;
-
 import javax.imageio.ImageIO;
-import javax.swing.JPanel;
+import java.io.ByteArrayInputStream;
+import java.awt.image.BufferedImage;
 
 public class SocketTest {
 

@@ -1,10 +1,7 @@
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 
 //혼합 자바
 
@@ -37,13 +34,13 @@ public class Algoritm extends SocketTest {
 		new SocketTest();
 
 		input = FindVertex.pattern(SocketTest.getImgToArr());
-		
-		for(int c = 0; c < input.length; c++) {
-			for(int r = 0; r < input[0].length; r++) {
+
+		for (int c = 0; c < input.length; c++) {
+			for (int r = 0; r < input[0].length; r++) {
 				input[0][c] = 0;
-				input[input.length-1][c] = 0;
+				input[input.length - 1][c] = 0;
 				input[r][0] = 0;
-				input[r][input[0].length-1] = 0;
+				input[r][input[0].length - 1] = 0;
 			}
 		}
 
@@ -121,7 +118,6 @@ public class Algoritm extends SocketTest {
 		System.out.println(test.get("Point"));
 		System.out.println(test.get("Angle"));
 
-		System.out.println("최종");
 		/*
 		 * for(int k = 0;k < input.length;k++) { for(int m = 0;m < input[0].length;m++)
 		 * System.out.print(input[k][m] + " "); System.out.println(""); }
@@ -135,6 +131,16 @@ public class Algoritm extends SocketTest {
 		frame.pack();
 		frame.setVisible(true);
 
+		synchronized (draw) {
+			try {
+				draw.wait();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		System.out.println("최종");
 	}
 
 	public static double getXpixel_length() {
@@ -154,6 +160,11 @@ public class Algoritm extends SocketTest {
 	}
 
 	public static ArrayList<Integer> getPathList() {
+		for (int k = 0; k < Points.size(); k++) {
+			pathList.add((int) penList.get(k));
+			pathList.add((int) Points.get(k).x);
+			pathList.add((int) Points.get(k).y);
+		}
 		return pathList;
 	}
 
@@ -200,7 +211,7 @@ public class Algoritm extends SocketTest {
 	}
 
 	public static void minDistance(int g, int h, int check_path) {
-		P StartP = new P(g, h);
+		P StartP = new P(h, g);
 		/*
 		 * System.out.println("시작 좌표값:(" + (int)StartP.x+","+ (int)StartP.y+")");
 		 */
@@ -218,7 +229,7 @@ public class Algoritm extends SocketTest {
 				}
 			}
 		}
-		double getangle = getangle = getAngle((int) StartP.x, (int) StartP.y, (int) nextP.x, (int) nextP.y);
+		double getangle = getAngle((int) StartP.y, (int) StartP.x, (int) nextP.y, (int) nextP.x);
 		/*
 		 * System.out.println("point : (" + (int)nextP.x + "," + (int)nextP.y +")");
 		 * System.out.println("최소  dist: "+ Math.round(min) + "   각도 : "+ getangle +
@@ -227,10 +238,9 @@ public class Algoritm extends SocketTest {
 		 * nextP.x+","+(int)nextP.y+")로 이동"); System.out.println("");
 		 */
 
-		P pointA = new P(nextP.x, nextP.y);
+		P pointA = new P(nextP.y, nextP.x);
 		pen = 1;
 		arrayOutput(pen, pointA, getangle);
-		pathOutput((int) nextP.x, (int) nextP.y, pen);
 		pen = 0;
 
 		i = (int) nextP.x;
@@ -240,12 +250,6 @@ public class Algoritm extends SocketTest {
 
 	static double distance(P p1, P p2) {
 		return p1.distance(p2);
-	}
-
-	public static void pathOutput(int cal, int row, int pen) {
-		pathList.add(pen);
-		pathList.add(cal);
-		pathList.add(row);
 	}
 
 	public static void arrayOutput(int pen, P point, double degree) {
@@ -278,15 +282,14 @@ public class Algoritm extends SocketTest {
 			 * 
 			 * System.out.println("("+i+","+j+") > ("+g+","+h+")");
 			 */
-			pathOutput(g, h, pen);
 
 			P startP = new P(i, j);
 			P points = new P(g, h);
 
-			newdegree = getAngle(i, j, g, h);
+			newdegree = getAngle(j, i, h, g);
 
 			// System.out.println(newdegree+"도");
-			P pointB = new P(g, h);
+			P pointB = new P(h, g);
 			arrayOutput(pen, pointB, newdegree);
 
 			i = g;

@@ -1,13 +1,5 @@
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Size;
-
 import java.util.ArrayList;
 import java.util.HashMap;
-
-//import javax.rmi.CORBA.Util;
-
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
@@ -37,6 +29,7 @@ public class ImageProcessing {
 	static double[] data = null;
 	static double[] dataVideo = null;
 	public static int[][] marker = new int[6][2];
+	public static Point[] sortedPoint = new Point[4];
 	static double angle = 0;
 	public static ArrayList<Integer> penList = new ArrayList<Integer>();
 	public static ArrayList<P> Points = new ArrayList<P>();
@@ -82,14 +75,14 @@ public class ImageProcessing {
 			areaChk = set_area.set_a(video);
 			marker1 = set_area.getMarker();
 			if(areaChk) {
-				set_area.getWrapMat().copyTo(wrapMat);
+				sortedPoint = set_area.getSortedPoint();
 				break;
 			}
 		}
 
 		int stack = 0;
 		while (stack != 2) {
-			show_view();
+			cropArea(cap);
 			int[][] marker_temp = new int[3][2];
 			car_detection(car_mark);
 			marker_temp[0][0] = car_marker[2][0];
@@ -120,67 +113,116 @@ public class ImageProcessing {
 		System.out.println(AngleList);
 		System.out.println(matrixXSize + "/" + matrixYSize);
 		*/
+		
 		rcCar = new jssctest();
 		rcCar.jssc();
+		
 		int i = 0;
 		int j = 0;
 		while (true) {
-			cap.read(video);
-		    Imgproc.warpPerspective(video, video, wrapMat, video.size());
+			cropArea(cap);
 			car_detection(car_mark);
-			//car_point();
-			//System.out.println("send order");
 			
 			//각도
 			rcCar.getOrder("D");
+			System.out.println("get : " + AngleList.get(i));
 			
 			while(j == 0) {
-				cap.read(video);
-			    Imgproc.warpPerspective(video, video, wrapMat, video.size());
+				cropArea(cap);
 				car_detection(car_mark);
-				System.out.println(angle);
-				System.out.println(AngleList.get(i));
 				//car_point();
-				
-				if (AngleList.get(i) <= angle + 1 && AngleList.get(i) >= angle - 1) {
+
+				if (AngleList.get(i) == angle) {			
+//				if (AngleList.get(i) <= angle + 15 && AngleList.get(i) >= angle - 15) {
 					rcCar.getOrder("S");
+					System.out.println("car : " + angle);
 					j++;
 					//System.out.println("D");
 				}
 			}
-				//펜, 전진
-			if (penList.get(i) == 0) {
-				rcCar.getOrder("w");
-				//System.out.println("w-");
-				// w
-			} else if (penList.get(i) == 1) {
-				rcCar.getOrder("W");
-				//System.out.println("W");
-				// W
-			}
-			while(j == 1) {
-				cap.read(video);
-			    Imgproc.warpPerspective(video, video, wrapMat, video.size());
+			
+			while(true) {
+				cropArea(cap);
 				car_detection(car_mark);
-				//car_point();
+				System.out.println("get : " + AngleList.get(i));
+				System.out.println("car : " + angle);
 				
+				if (AngleList.get(i) <= angle + 0.5 && AngleList.get(i) >= angle - 0.5)
+					break;
+				
+				try {
+					Thread.sleep(30);
+				}catch(Exception e) {
+					e.printStackTrace();
+				}
+							
+				if(AngleList.get(i) == 180.0) {
+					if(angle > 0) // 차각이 더 큼
+						turn_left();
+					else if(angle < 0) // 차각이 더 작음
+						turn_right();
+				}
+				else if(AngleList.get(i) < angle -0.5) // 차각이 더 큼
+					turn_right();
+				else if(AngleList.get(i) > angle +0.5) // 차각이 더 작음
+					turn_left();
+				
+			}
+			
+			
+			while(true) {
+				
+				//펜, 전진
+				if (penList.get(i) == 0) {
+					rcCar.getOrder("w");
+					rcCar.getOrder("S");
+					//System.out.println("w-");
+					// w
+				} else if (penList.get(i) == 1) {
+					rcCar.getOrder("W");
+					rcCar.getOrder("S");
+					//System.out.println("W");
+					// W
+				}
+					cropArea(cap);
+					car_detection(car_mark);
+					//car_point();
+					
+					try {
+						Thread.sleep(100);
+					}catch(Exception e) {
+						e.printStackTrace();
+					}
+					
+					
 					if (tolerance(i) == 2) {
-						rcCar.getOrder("S");
-						j++;
+						break;
 					}
 				}
-				i++;
-			
+				
+			i++;
 		}
-
 	}
 
+	public static void turn_left() {
+		rcCar.getOrder("A");
+		
+		rcCar.getOrder("S");
+	}
+	
+	public static void turn_right() {
+		rcCar.getOrder("D");
+		
+		rcCar.getOrder("S");
+	}
 	public static int tolerance(int i) {
 		int a = 0;
-		if (Points.get(i).x <= (car_marker[2][0] + 5) && Points.get(i).x >= (car_marker[2][0] - 5)) {
+		if (Points.get(i).x <= (marker[0][0] + 1) && Points.get(i).x >= (marker[0][0] - 1)) {
+			System.out.println(Points.get(i).x + ", " + Points.get(i).y);
+			System.out.println(marker[0][0] + ", " + marker[0][1]);
 			a++;
 		}
-		if (Points.get(i).y <= (car_marker[2][1] + 5) && Points.get(i).y >= (car_marker[2][1] - 5)) {
+		if (Points.get(i).y <= (marker[0][1] + 1) && Points.get(i).y >= (marker[0][1] - 1)) {
 			a++;
 		}
 		return a;
@@ -233,7 +275,7 @@ public class ImageProcessing {
 		int[] sendCarMarker = new int[2];
 		sendCarMarker[0] = car_marker[2][0];
 		sendCarMarker[1] = car_marker[2][1];
-		System.out.println("Center : " + sendCarMarker[0] + " , " + sendCarMarker[1]);
+//		System.out.println("Center : " + sendCarMarker[0] + " , " + sendCarMarker[1]);
 		// 좌 A 우D 후진X 전진 펜o W 펜x w 멈춤 S
 		/*
 		 * System.out.println("Haed : " + marker1[3][0] + " , " + marker1[3][1]);
@@ -242,14 +284,31 @@ public class ImageProcessing {
 		 * System.out.println("Angle : " + angle);
 		 */
 	}
+	
+	public static void cropArea(VideoCapture cap) {
+		cap.read(video);
+		Imgproc.resize(video, video, new Size(700,700));
+	    MatOfPoint2f src = new MatOfPoint2f(sortedPoint[0], sortedPoint[1], sortedPoint[2],sortedPoint[3]);
+	    int w = video.cols();
+	    int h = video.rows();
+	    MatOfPoint2f dst = new MatOfPoint2f(new Point(0, 0), new Point(w-1,0), new Point(0,h-1), new Point(w-1,h-1));
+	    Mat wrapMat = Imgproc.getPerspectiveTransform(src,dst);
+	    Imgproc.warpPerspective(video, video, wrapMat, video.size());
+	}
 
-	public static double getAngle(int marker1[][]) {
-		int dx = marker1[1][0] - marker1[0][0];
-		int dy = marker1[1][1] - marker1[0][1];
+	public static double getAngle(int car_marker[][]) {
+		int dx = car_marker[1][0] - car_marker[0][0];
+		int dy = car_marker[1][1] - car_marker[0][1];
 
 		double rad = Math.atan2(dx, dy);
-		double degree = (rad * 180) / Math.PI;
-
+		double degree = ((rad * 180) / Math.PI);
+		if(degree >= 0) {
+			degree = 180 - degree;
+			degree = -degree;
+		} else {
+			degree = degree + 180;
+		}
+		
 		return degree;
 	}
 

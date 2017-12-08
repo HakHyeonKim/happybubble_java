@@ -1,7 +1,5 @@
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Vector;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -9,14 +7,14 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.videoio.VideoCapture;
 
 public class SetArea {
 	static VideoFrame vertexFrame = new VideoFrame();
 	static MatOfPoint2f approx = new MatOfPoint2f();
 	public static int marker[][] = new int[4][2];
-	public static Mat wrapMat;
+	public static Point[] sortedPoint = new Point[4];
 
 	public Boolean set_a(Mat camvideo) {
 		vertexFrame.setVisible(true);
@@ -26,13 +24,14 @@ public class SetArea {
 		Mat resultVideo = new Mat();
 		Mat mask = new Mat();
 		MatOfPoint2f approxTemp = new MatOfPoint2f();
-		int sensitivity = 40;
+		int sensitivity = 25;
 		int idx = 0;
 		Boolean test = false;
-
+		Imgproc.resize(video, video, new Size(700,700));
+		
 		Imgproc.cvtColor(video, blackVideo, Imgproc.COLOR_BGR2HSV);
-		Core.inRange(blackVideo, new Scalar(120 - sensitivity, 50, 50, 0), new Scalar(120 + sensitivity, 255, 255, 0),mask);
-		video.copyTo(resultVideo);
+		Core.inRange(blackVideo, new Scalar(120 - sensitivity, 100, 100, 0), new Scalar(120 + sensitivity, 255, 255, 0),mask);
+		video.copyTo(resultVideo, mask);
 
 		// 그레이스케일 이미지로 변환
 		Imgproc.cvtColor(resultVideo, tempImg, Imgproc.COLOR_BGR2GRAY);
@@ -50,15 +49,15 @@ public class SetArea {
 			Mat checkArea = new Mat();
 			approx.convertTo(checkArea, CvType.CV_32S);
 			double areaSize = Math.abs(Imgproc.contourArea(checkArea));
-			if (areaSize > 10 && areaSize < 1500) {
+			if (areaSize > 10) {
 				int size = approx.rows();
 				int[] getPoint = new int[2];
 				getPoint = getMarkerPoint(size);
 				
-				if (checkMarker(getPoint) && size == 3) {
+				if (checkMarker(getPoint) && (size == 3 || size == 4)) {
 					System.out.println(idx + " - OK");
 					// Imgproc.circle(video, new Point(getPoint[0], getPoint[1]), 10, new Scalar(0, 255, 255));
-					Imgproc.drawContours(video, contours, i, new Scalar(0, 0, 255));
+					Imgproc.drawContours(resultVideo, contours, i, new Scalar(0, 0, 255));
 					marker[idx][0] = getPoint[0];
 					marker[idx++][1] = getPoint[1];
 					if(idx == 4)	test = true;
@@ -90,11 +89,10 @@ public class SetArea {
 				}
 				*/
 			}
-			if(!video.empty()) { vertexFrame.render(video); }	
+			if(!video.empty()) { vertexFrame.render(resultVideo); }	
 		}
 		if(test) {
 			int[] centerPoint = new int[2];
-			Point[] sortedPoint = new Point[4];
 			
 			centerPoint[0] = (marker[0][0] + marker[1][0] + marker[2][0] + marker[3][0]) / 4;
 			centerPoint[1] = (marker[0][1] + marker[1][1] + marker[2][1] + marker[3][1]) / 4;
@@ -109,12 +107,12 @@ public class SetArea {
 				else if(marker[i][0] > centerPoint[0] && marker[i][1] > centerPoint[1])
 					sortedPoint[3] = new Point(marker[i][0], marker[i][1]);
 			}
-			MatOfPoint2f src = new MatOfPoint2f(sortedPoint[0], sortedPoint[1], sortedPoint[2],sortedPoint[3]);
-			int w = video.cols();
-			int h = video.rows();
-			MatOfPoint2f dst = new MatOfPoint2f(new Point(0, 0), new Point(w-1,0), new Point(0,h-1), new Point(w-1,h-1));
-			Mat wrapMat = Imgproc.getPerspectiveTransform(src,dst);
-			setWrapMat(wrapMat);
+			setSortedPoint(sortedPoint);
+		    MatOfPoint2f src = new MatOfPoint2f(sortedPoint[0], sortedPoint[1], sortedPoint[2],sortedPoint[3]);
+		    int w = video.cols();
+		    int h = video.rows();
+		    MatOfPoint2f dst = new MatOfPoint2f(new Point(0, 0), new Point(w-1,0), new Point(0,h-1), new Point(w-1,h-1));
+		    Mat wrapMat = Imgproc.getPerspectiveTransform(src,dst);
 		    Imgproc.warpPerspective(video, video, wrapMat, video.size());
 			if(!video.empty()) { 
 				vertexFrame.render(video);
@@ -123,15 +121,15 @@ public class SetArea {
 		}
 		return test;
 	}
-
-	public Mat getWrapMat() {
-		return wrapMat;
-	}
-
-	public static void setWrapMat(Mat wrapMat) {
-		SetArea.wrapMat = wrapMat;
-	}
 	
+	public static Point[] getSortedPoint() {
+		return sortedPoint;
+	}
+
+	public static void setSortedPoint(Point[] sortedPoint) {
+		SetArea.sortedPoint = sortedPoint;
+	}
+
 	public int[][] getMarker() {
 		return marker;
 	}
