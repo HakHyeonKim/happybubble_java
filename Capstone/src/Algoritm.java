@@ -28,7 +28,7 @@ public class Algoritm extends SocketTest {
 	public static double y_length;
 	public static double xpixel_length, ypixel_length;
 
-	public static void Algo(int[][] marker1) {
+	public static void Algo(int[] marker1) {
 		// TODO Auto-generated method stub
 
 		new SocketTest();
@@ -55,8 +55,8 @@ public class Algoritm extends SocketTest {
 		frame.setLocation(0, 0);
 		frame.setPreferredSize(dim);
 
-		i = marker1[2][0]; // x
-		j = marker1[2][1]; // y
+		i = marker1[0]; // x
+		j = marker1[1]; // y
 		System.out.println(i + " , " + j);
 		g = i;
 		h = j;

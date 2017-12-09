@@ -36,7 +36,7 @@ public class ImageProcessing {
 	public static ArrayList<Double> AngleList = new ArrayList<Double>();
 	public static jssctest rcCar;
 	public static int[][] marker1 = new int[4][2];
-	public static int[][] car_marker = new int[4][2];
+	public static int[] car_marker = new int[2];
 	static VideoFrame colorFrame = new VideoFrame();
 	static VideoFrame byteFrame = new VideoFrame();
 
@@ -83,15 +83,14 @@ public class ImageProcessing {
 		int stack = 0;
 		while (stack != 2) {
 			cropArea(cap);
-			int[][] marker_temp = new int[3][2];
+			int[] marker_temp = new int[2];
 			car_detection(car_mark);
-			marker_temp[0][0] = car_marker[2][0];
-			marker_temp[0][1] = car_marker[2][1];
+			marker_temp[0] = car_marker[0];
+			marker_temp[1] = car_marker[1];
 			for (int i = 0; i < 2; i++) {
 				car_detection(car_mark);
 				// System.out.println(stack);
-				if (marker_temp[0][0] == car_marker[2][0] && marker_temp[0][1] == car_marker[2][1]
-						&& marker_temp[0][0] != 0)
+				if (marker_temp[0] == car_marker[0] && marker_temp[1] == car_marker[1] && marker_temp[0] != 0)
 					stack++;
 				else {
 					stack = 0;
@@ -231,16 +230,16 @@ public class ImageProcessing {
 	public static void car_point() {
 		xpixel_length = Algoritm.getXpixel_length();
 		ypixel_length = Algoritm.getXpixel_length();
-		marker[0][0] = car_marker[2][0];
-		marker[0][1] = car_marker[2][1];
+		marker[0][0] = car_marker[0];
+		marker[0][1] = car_marker[1];
 		//System.out.println(marker[0][0] + "  ,  " + marker[0][1] + " , " + angle);
 	}
 
 	public static void sizeSet() {
 		x_length = Math.sqrt(Math.pow((marker1[1][0] - marker1[0][0]), 2) + Math.pow((marker1[1][1] - marker1[0][1]), 2));
 		y_length = Math.sqrt(Math.pow((marker1[2][0] - marker1[0][0]), 2) + Math.pow((marker1[2][1] - marker1[0][1]), 2));
-		marker[0][0] = car_marker[2][0] - marker1[0][0];
-		marker[0][1] = car_marker[2][1] - marker1[0][1];
+		marker[0][0] = car_marker[0] - marker1[0][0];
+		marker[0][1] = car_marker[1] - marker1[0][1];
 	}
 
 	public static void show_view() {
@@ -266,15 +265,15 @@ public class ImageProcessing {
 	}
 
 	public static void car_detection(CarDetector car_mark) {
-		car_mark.setMarker1(marker1);
+//		car_mark.setMarker1(marker1);
 		car_mark.CarDetect(video);
-		car_marker = car_mark.getMarker();
+		car_marker = car_mark.getCarMarker();
+		angle = car_mark.getCarAngle();
 		show_view();
 		
-		angle = getAngle(car_marker);
 		int[] sendCarMarker = new int[2];
-		sendCarMarker[0] = car_marker[2][0];
-		sendCarMarker[1] = car_marker[2][1];
+		sendCarMarker[0] = car_marker[0];
+		sendCarMarker[1] = car_marker[1];
 //		System.out.println("Center : " + sendCarMarker[0] + " , " + sendCarMarker[1]);
 		// ÁÂ A ¿ìD ÈÄÁøX ÀüÁø Ææo W Ææx w ¸ØÃã S
 		/*
@@ -296,22 +295,6 @@ public class ImageProcessing {
 	    Imgproc.warpPerspective(video, video, wrapMat, video.size());
 	}
 
-	public static double getAngle(int car_marker[][]) {
-		int dx = car_marker[1][0] - car_marker[0][0];
-		int dy = car_marker[1][1] - car_marker[0][1];
-
-		double rad = Math.atan2(dx, dy);
-		double degree = ((rad * 180) / Math.PI);
-		if(degree >= 0) {
-			degree = 180 - degree;
-			degree = -degree;
-		} else {
-			degree = degree + 180;
-		}
-		
-		return degree;
-	}
-
 	public static int[][] getMarker() {
 		return marker1;
 	}
@@ -320,11 +303,11 @@ public class ImageProcessing {
 		ImageProcessing.marker1 = marker1;
 	}
 
-	public static int[][] getCarMarker() {
+	public static int[] getCarMarker() {
 		return car_marker;
 	}
 
-	public static void setCarMarker(int[][] marker1) {
+	public static void setCarMarker(int[] marker1) {
 		ImageProcessing.car_marker = marker1;
 	}
 
