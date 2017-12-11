@@ -49,10 +49,10 @@ public class Algoritm extends SocketTest {
 		xpixel_length = x_length / input[0].length;
 		ypixel_length = y_length / input.length;
 
-		Dimension dim = new Dimension(800, 700);
+		Dimension dim = new Dimension(800, 800);
 
 		JFrame frame = new JFrame();
-		frame.setLocation(0, 0);
+		frame.setLocation(800, 0);
 		frame.setPreferredSize(dim);
 
 		i = marker1[0]; // x
@@ -83,8 +83,9 @@ public class Algoritm extends SocketTest {
 			for (int a = 0; a < AngleList.size() - 1; a++) {
 				double angle = AngleList.get(a);
 				double preAngle = AngleList.get(a + 1);
+				int upPen = penList.get(a);
 				// System.out.println(angle + " / " + preAngle);
-				if (angle == preAngle) {
+				if (angle == preAngle && upPen == 0) {
 					penList.remove(a);
 					Points.remove(a);
 					AngleList.remove(a);

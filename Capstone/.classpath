@@ -3,5 +3,8 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/opencv"/>
+	<classpathentry kind="lib" path="C:/serial/rxtx-2.2pre2-bins/RXTXcomm.jar"/>
+	<classpathentry kind="lib" path="C:/serial/javax.jar/javax.jar"/>
+	<classpathentry kind="lib" path="C:/serial/jSSC-2.8.0-Release/jSSC-2.8.0-Release/jssc.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

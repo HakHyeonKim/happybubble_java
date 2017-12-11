@@ -20,6 +20,14 @@ public class FindVertex {
 
 	public static int[][] pattern(int[][] input) {
 		int[][] imgArr = input;
+
+		int[][] tempArr = new int[imgArr.length][imgArr[0].length];
+		for (int i = 0; i < imgArr.length; i++) {
+			for (int j = 0; j < imgArr[0].length; j++) {
+				tempArr[i][j] = imgArr[i][j];
+			}
+			System.out.println("");
+		}
 		Mat vertexImg = Imgcodecs.imread("test.png");
 		Mat tempImg = new Mat();
 		MatOfPoint approxTemp = new MatOfPoint();
@@ -42,6 +50,7 @@ public class FindVertex {
 					xy[0] = Integer.parseInt(splitTemp[0].replaceAll("[^0-9]", ""));
 					xy[1] = Integer.parseInt(splitTemp[1].replaceAll("[^0-9]", ""));
 					imgArr[xy[0]][xy[1]] = intPattern;
+					tempArr[xy[0]][xy[1]] = intPattern;
 					// System.out.println("ÁÂÇ¥ : (" + replaceTemp[0] + "," + replaceTemp[1] + ")");
 					// Imgproc.circle(vertexImg, new
 					// Point(Integer.parseInt(replaceTemp[0]),Integer.parseInt(replaceTemp[1])), -1,
@@ -54,14 +63,18 @@ public class FindVertex {
 				intPattern++;
 			// patternIdx++;
 		}
-		/*
-		 * for(int i = 0;i < imgArr.length;i++) { for(int j = 0;j <
-		 * imgArr[0].length;j++) { System.out.print(" " + imgArr[i][j]); }
-		 * System.out.println(""); }
-		 */
+		
+		  //for(int i = 0;i < imgArr.length;i++) { for(int j = 0;j <
+		  //imgArr[0].length;j++) { System.out.print(" " + imgArr[i][j]); }
+		 // System.out.println(""); }
+		 
 		// vertexFrame.setVisible(true);
 		// vertexFrame.render(vertexImg);
-
+		for (int i = 0; i < imgArr.length; i++) {
+			for (int j = 0; j < imgArr[0].length; j++) {
+				imgArr[imgArr.length - 1 - i][j] = tempArr[i][j];
+			}
+		}
 		return imgArr;
 	}
 }

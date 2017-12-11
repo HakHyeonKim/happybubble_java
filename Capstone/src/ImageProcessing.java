@@ -81,23 +81,8 @@ public class ImageProcessing {
 		}
 
 		int stack = 0;
-		while (stack != 2) {
-			cropArea(cap);
-			int[] marker_temp = new int[2];
-			car_detection(car_mark);
-			marker_temp[0] = car_marker[0];
-			marker_temp[1] = car_marker[1];
-			for (int i = 0; i < 2; i++) {
-				car_detection(car_mark);
-				// System.out.println(stack);
-				if (marker_temp[0] == car_marker[0] && marker_temp[1] == car_marker[1] && marker_temp[0] != 0)
-					stack++;
-				else {
-					stack = 0;
-					break;
-				}
-			}
-		}
+		car_detection(car_mark, cap, 3);
+
 		sizeSet();
 		Algoritm.Algo(car_marker);
 		test = Algoritm.getHash();
@@ -119,20 +104,22 @@ public class ImageProcessing {
 		int i = 0;
 		int j = 0;
 		while (true) {
-			cropArea(cap);
-			car_detection(car_mark);
-			
+			rcCar.getOrder("Z");
+			try {
+				Thread.sleep(500);
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
 			//각도
 			rcCar.getOrder("D");
 			System.out.println("get : " + AngleList.get(i));
 			
 			while(j == 0) {
-				cropArea(cap);
-				car_detection(car_mark);
+				car_detection(car_mark, cap, 2);
 				//car_point();
 
-				if (AngleList.get(i) == angle) {			
-//				if (AngleList.get(i) <= angle + 15 && AngleList.get(i) >= angle - 15) {
+//				if (AngleList.get(i) == angle) {			
+				if (AngleList.get(i) <= angle + 15 && AngleList.get(i) >= angle - 15) {
 					rcCar.getOrder("S");
 					System.out.println("car : " + angle);
 					j++;
@@ -141,18 +128,17 @@ public class ImageProcessing {
 			}
 			
 			while(true) {
-				cropArea(cap);
-				car_detection(car_mark);
-				System.out.println("get : " + AngleList.get(i));
-				System.out.println("car : " + angle);
-				
-				if (AngleList.get(i) <= angle + 0.5 && AngleList.get(i) >= angle - 0.5)
+				car_detection(car_mark, cap, 2);
+//				System.out.println("get : " + AngleList.get(i));
+//				System.out.println("car : " + angle);
+
+				if (AngleList.get(i) <= angle + 0.5 && AngleList.get(i) >= angle - 0.5) {
+					System.out.println("car : " + angle);
 					break;
-				
-				try {
-					Thread.sleep(30);
-				}catch(Exception e) {
-					e.printStackTrace();
+				}
+				else if(AngleList.get(i) == 180 && -AngleList.get(i) <= angle + 0.5 && angle < 0) {
+					System.out.println("car : " + angle);
+					break;
 				}
 							
 				if(AngleList.get(i) == 180.0) {
@@ -161,43 +147,52 @@ public class ImageProcessing {
 					else if(angle < 0) // 차각이 더 작음
 						turn_right();
 				}
-				else if(AngleList.get(i) < angle -0.5) // 차각이 더 큼
+				else if(AngleList.get(i) < angle - 0.5) // 차각이 더 큼
 					turn_right();
-				else if(AngleList.get(i) > angle +0.5) // 차각이 더 작음
+				else if(AngleList.get(i) > angle + 0.5) // 차각이 더 작음
 					turn_left();
-				
 			}
 			
-			
-			while(true) {
-				
-				//펜, 전진
-				if (penList.get(i) == 0) {
-					rcCar.getOrder("w");
-					rcCar.getOrder("S");
-					//System.out.println("w-");
-					// w
-				} else if (penList.get(i) == 1) {
-					rcCar.getOrder("W");
-					rcCar.getOrder("S");
-					//System.out.println("W");
-					// W
+
+			if (penList.get(i) == 0) {
+				rcCar.getOrder("C");
+				try {
+					Thread.sleep(500);
+				}catch(Exception e) {
+					e.printStackTrace();
 				}
-					cropArea(cap);
-					car_detection(car_mark);
-					//car_point();
-					
+				rcCar.getOrder("X");
+//				
+				//System.out.println("w-");
+				// w
+			} else if (penList.get(i) == 1) {
+				rcCar.getOrder("Z");
+				try {
+					Thread.sleep(500);
+				}catch(Exception e) {
+					e.printStackTrace();
+				}
+				rcCar.getOrder("X");
+//				rcCar.getOrder("S");
+				//System.out.println("W");
+				// W
+			}
+			while(true) {
+				car_detection(car_mark, cap, 0);
+				if (tolerance(i) == 2) {
+					rcCar.getOrder("S");
+					break;
+				}
+				//펜, 전진
+				//car_point();
+/*					
 					try {
 						Thread.sleep(100);
 					}catch(Exception e) {
 						e.printStackTrace();
 					}
-					
-					
-					if (tolerance(i) == 2) {
-						break;
-					}
-				}
+*/
+			}
 				
 			i++;
 		}
@@ -205,34 +200,34 @@ public class ImageProcessing {
 
 	public static void turn_left() {
 		rcCar.getOrder("A");
-		
+		try {
+			Thread.sleep(100);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 		rcCar.getOrder("S");
 	}
 	
 	public static void turn_right() {
 		rcCar.getOrder("D");
-		
+		try {
+			Thread.sleep(100);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 		rcCar.getOrder("S");
 	}
 	public static int tolerance(int i) {
 		int a = 0;
-		if (Points.get(i).x <= (marker[0][0] + 1) && Points.get(i).x >= (marker[0][0] - 1)) {
-			System.out.println(Points.get(i).x + ", " + Points.get(i).y);
-			System.out.println(marker[0][0] + ", " + marker[0][1]);
+		System.out.println(Points.get(i).x + ", " + Points.get(i).y);
+		System.out.println(car_marker[0] + ", " + car_marker[1]);
+		if (Points.get(i).x <= (car_marker[0] + 1) && Points.get(i).x >= (car_marker[0] - 1)) {
 			a++;
 		}
-		if (Points.get(i).y <= (marker[0][1] + 1) && Points.get(i).y >= (marker[0][1] - 1)) {
+		if (Points.get(i).y <= (car_marker[1] + 1) && Points.get(i).y >= (car_marker[1] - 1)) {
 			a++;
 		}
 		return a;
-	}
-
-	public static void car_point() {
-		xpixel_length = Algoritm.getXpixel_length();
-		ypixel_length = Algoritm.getXpixel_length();
-		marker[0][0] = car_marker[0];
-		marker[0][1] = car_marker[1];
-		//System.out.println(marker[0][0] + "  ,  " + marker[0][1] + " , " + angle);
 	}
 
 	public static void sizeSet() {
@@ -264,12 +259,24 @@ public class ImageProcessing {
 		}
 	}
 
-	public static void car_detection(CarDetector car_mark) {
-//		car_mark.setMarker1(marker1);
-		car_mark.CarDetect(video);
-		car_marker = car_mark.getCarMarker();
-		angle = car_mark.getCarAngle();
-		show_view();
+	public static void car_detection(CarDetector car_mark, VideoCapture cap, int vaild) {
+		int[] car_markerTemp = {0, 0};
+		int a = 0;
+		while(true) {
+			cropArea(cap);
+			car_mark.CarDetect(video);
+			car_marker = car_mark.getCarMarker();
+			angle = car_mark.getCarAngle();
+			if(car_marker[0] == car_markerTemp[0] && car_marker[1] == car_markerTemp[1] && car_markerTemp[0] != 0)
+				a++;
+			else {
+				car_markerTemp = car_marker;
+				a = 0;
+			}
+			if(a >= vaild)
+				break;
+			show_view();
+		}
 		
 		int[] sendCarMarker = new int[2];
 		sendCarMarker[0] = car_marker[0];

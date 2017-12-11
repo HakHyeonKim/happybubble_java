@@ -49,7 +49,7 @@ public class SetArea {
 			Mat checkArea = new Mat();
 			approx.convertTo(checkArea, CvType.CV_32S);
 			double areaSize = Math.abs(Imgproc.contourArea(checkArea));
-			if (areaSize > 10) {
+			if (areaSize > 100 && areaSize < 2000) {
 				int size = approx.rows();
 				int[] getPoint = new int[2];
 				getPoint = getMarkerPoint(size);

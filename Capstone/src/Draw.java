@@ -7,10 +7,10 @@ public class Draw extends JPanel implements ActionListener {
 
 	public static ArrayList<Integer> list = new ArrayList<Integer>();
 
-	Timer time = new Timer(100, (ActionListener) this);
+	Timer time = new Timer(50, (ActionListener) this);
 	int a = 0;
 	int b = 3;
-	int s = 10;
+	int s = 7;
 	int size = 0;
 
 	public void animateLine(Graphics2D g2d) {
@@ -20,6 +20,9 @@ public class Draw extends JPanel implements ActionListener {
 		// System.out.println(b);
 		if (b < size)
 			b += 3;
+		if (b == size)
+			System.out.println("그리기 완료");
+		
 		synchronized (this) {
 			for (a = 0; a < b; a += 3) {
 
@@ -46,8 +49,6 @@ public class Draw extends JPanel implements ActionListener {
 		repaint();
 		// System.out.println("그리는중");
 		// System.out.println(b);
-		if (b == size - 3)
-			System.out.println("그리기 완료");
 		// System.out.println(b);
 	}
 
