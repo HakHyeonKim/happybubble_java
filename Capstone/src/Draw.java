@@ -10,7 +10,7 @@ public class Draw extends JPanel implements ActionListener {
 	Timer time = new Timer(50, (ActionListener) this);
 	int a = 0;
 	int b = 3;
-	int s = 8;
+	int s = 7;
 	int size = 0;
 
 	public void animateLine(Graphics2D g2d) {
