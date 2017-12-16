@@ -63,11 +63,8 @@ public class FindVertex {
 				intPattern++;
 			// patternIdx++;
 		}
-		
-		  //for(int i = 0;i < imgArr.length;i++) { for(int j = 0;j <
-		  //imgArr[0].length;j++) { System.out.print(" " + imgArr[i][j]); }
-		 // System.out.println(""); }
-		 
+
+
 		// vertexFrame.setVisible(true);
 		// vertexFrame.render(vertexImg);
 		for (int i = 0; i < imgArr.length; i++) {
@@ -75,6 +72,13 @@ public class FindVertex {
 				imgArr[imgArr.length - 1 - i][j] = tempArr[i][j];
 			}
 		}
+		/*
+		for (int i = 0; i < imgArr.length; i++) {
+			for (int j = 0; j < imgArr[0].length; j++) {
+				System.out.print(" " + imgArr[i][j]);
+			}
+			System.out.println("");
+		}*/
 		return imgArr;
 	}
 }

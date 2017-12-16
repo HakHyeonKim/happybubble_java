@@ -11,23 +11,27 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 public class CarDetector {
-	public final static int[] markerMaxSize = {1500, 2000, 600};
-	public final static int[] markerMinSize = {600, 300, 100};
+	public final static int[] markerMaxSize = {1000, 1000, 390};
+	public final static int[] markerMinSize = {400, 100, 100};
 	public final static int[] panelSize = {700, 700};
 	public final static int settingWidth = 100;
 	public final static int settingHeight = 100;
 //	public final static int sensitivity = 45;
 	public final static Scalar[] colorRangeMin = {
-			new Scalar(50, 80, 80, 0)
-			, new Scalar(0, 80, 80)
-			, new Scalar(50, 80, 80, 0)};
+			new Scalar(50, 70, 70, 0)
+			, new Scalar(0, 75, 75)
+			, new Scalar(50, 70, 70, 0)};
 	public final static Scalar[] colorRangeMax = {
 			new Scalar(100, 255, 255, 0)
 			, new Scalar(50, 255, 255)
 			, new Scalar(100, 255, 255, 0)};
+	final static int carSize = 100;
+	final static int videoSize = 700;
+	final static int[] setArea = {carSize, videoSize - carSize};
 	// define 영역
 
 	public static VideoFrame vertexFrame = new VideoFrame();
+//	public static VideoFrame greenFrame = new VideoFrame();
 	public static List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 	public static MatOfPoint2f approx = new MatOfPoint2f();
 	public static int[] carMarker = new int[2];
@@ -41,11 +45,14 @@ public class CarDetector {
 	public static int tempyPoint[][] = new int[3][4];
 	public static int[][] markerTop = new int[2][2];
 	public static double[] topMarker = new double[2];
+	public static double[] markerTopSize = new double[2];
+	public static ArrayList<int[]> markerBottom = new ArrayList<int[]>();
 	
 	
 	public void CarDetect(Mat camvideo) {
 		Mat video = camvideo;
 		vertexFrame.setVisible(true);
+//		greenFrame.setVisible(true);
 		int[] markerForward = new int[2];
 		ArrayList<int[]> markerBottom = new ArrayList<int[]>();
 		Mat[] tempVideo = new Mat[3];
@@ -53,7 +60,6 @@ public class CarDetector {
 		Mat[] resultVideo = new Mat[3];
 		Mat[] blackVideo = new Mat[3];
 		Imgproc.resize(video, video, new Size(panelSize[0],panelSize[1]));
-		
 		for(int j = 0;j < 3;j++) {
 			tempVideo[j] = new Mat();
 			mask[j] = new Mat();
@@ -87,23 +93,19 @@ public class CarDetector {
 				int size = approx.rows();
 				int[] getPoint = new int[2];	
 				getPoint = getMarkerPoint(size);
-				Imgproc.putText(resultVideo[j], "" + areaSize, new Point(getPoint[0], getPoint[1]), 1, 2, new Scalar(255,255,255));
 				if (areaSize > markerMinSize[j] && areaSize <= markerMaxSize[j]) {
-					Imgproc.drawContours(resultVideo[j], contours, i, new Scalar(0, 0, 255));
+//					Imgproc.putText(resultVideo[j], "" + areaSize, new Point(getPoint[0], getPoint[1]), 1, 2, new Scalar(255,255,255));
+//					Imgproc.drawContours(resultVideo[j], contours, i, new Scalar(0, 0, 255));
 //					Imgproc.circle(video, new Point(getPoint[0], getPoint[1]), 4, new Scalar(0, 255, 0));
 					if(j == 0 && a < 2) {
 						markerTop[a][0] = getPoint[0];
 						markerTop[a][1] = getPoint[1];
-						
-						for(int k = 0; k < 4; k ++) {
-							tempxPoint[a][k] = (int) approx.get(k, 0)[0];
-							tempyPoint[a][k] = (int) approx.get(k, 0)[1];
-//							Imgproc.circle(video, new Point(tempxPoint[a][k], tempyPoint[a][k]), 3, new Scalar(0, 0, 255));							  
-						}
+						markerTopSize[a] = areaSize;
 		            }
 					
 					else if(j == 1 && a < 2) {
 						markerBottom.add(getPoint);
+						//Imgproc.circle(video, new Point(markerBottom.get(a)[0], markerBottom.get(a)[1]), 3, new Scalar(0, 0, 255));
 					}
 					else if(j == 2 && a < 1) {
 						markerForward[0] = getPoint[0];
@@ -121,39 +123,15 @@ public class CarDetector {
 		size[0] = video.cols();
 		size[1] = video.rows();
 		
-		int target[] = new int[2];
-		target = find_marker();
 //		Imgproc.circle(video, new Point(pointList[target[0]][0], pointList[target[0]][1]), 3, new Scalar(0, 0, 255));
 //		Imgproc.circle(video, new Point(pointList[target[1]][0], pointList[target[1]][1]), 3, new Scalar(0, 0, 255));
-		
-		switch(markerBottom.size()) {
-			case 1 :	// marker가 한 개만 보일 경우
-				double[] distance = new double[2];
-				double[] move = new double[2];
-				int selectMarkerNum;
-				
-				distance[0] = getDistance(pointList[target[0]], markerBottom.get(0));
-				distance[1] = getDistance(pointList[target[1]], markerBottom.get(0));
-				if(distance[0] <= distance[1]) selectMarkerNum = 0;
-				else selectMarkerNum = 1;
-				
-				for(int i = 0;i < 2;i++) {
-					topMarker[i] = (pointList[target[0]][i] + pointList[target[1]][i]) / 2;
-					move[i] = markerBottom.get(0)[i] - pointList[target[selectMarkerNum]][i];
-					carMarker[i] = (int) (topMarker[i] + move[i]);
-				}
-				break;
-			case 2 : 	// marker가 두 개 모두 보일 경우
-				carMarker[0] = (int) ((markerBottom.get(0)[0] + markerBottom.get(1)[0]) / 2);
-				carMarker[1] = (int) ((markerBottom.get(0)[1] + markerBottom.get(1)[1]) / 2); 
-				break;
-		}
-		
-		
-		Imgproc.circle(video, new Point(carMarker[0], carMarker[1]), 3, new Scalar(0, 0, 255));
-		carMarker[0] = carMarker[0] / (size[0] / settingWidth);
-		carMarker[1] = carMarker[1] / (size[1] / settingHeight);
-		
+
+		topMarker[0] = (markerTop[0][0] + markerTop[1][0]) / 2;
+		topMarker[1] = (markerTop[0][1] + markerTop[1][1]) / 2;
+//		Imgproc.circle(resultVideo[2], new Point(topMarker[0], topMarker[1]), 3, new Scalar(255, 0, 0));
+		//Imgproc.circle(video, new Point(markerTop[0][0], markerTop[0][1]), 3, new Scalar(0, 255, 0));
+		//Imgproc.circle(video, new Point(markerTop[1][0], markerTop[1][1]), 3, new Scalar(0, 255, 0));						  
+
 		double dx = topMarker[0] - markerForward[0];
 		double dy = topMarker[1] - markerForward[1];
 
@@ -165,15 +143,99 @@ public class CarDetector {
 		} else {
 			degree = degree + 180;
 		}
-		
+
+//		System.out.println("test : " + markerBottom.size());
+		switch(markerBottom.size()) {
+			case 1 :	// marker가 한 개만 보일 경우
+				double[] distance = new double[2];
+				double[] move = new double[2];
+				int selectMarkerNum;
+				double target[] = new double[2];
+				int bottom[] = new int[2]; 
+				bottom = markerBottom.get(0);
+				distance[0] = getDistance(markerTop[0], markerBottom.get(0));
+				distance[1] = getDistance(markerTop[1], markerBottom.get(0));
+				if(distance[0] <= distance[1]) selectMarkerNum = 0;
+				else selectMarkerNum = 1;
+				
+				target = find_marker(selectMarkerNum, degree, bottom);				
+//				Imgproc.circle(video, new Point(target[0], target[1]), 3, new Scalar(255, 0, 255));
+				
+				for(int i = 0;i < 2;i++) {
+					move[i] = markerBottom.get(0)[i] - target[i];
+					carMarker[i] = (int) (topMarker[i] + move[i]);
+				}
+				break;
+			case 2 : 	// marker가 두 개 모두 보일 경우
+				carMarker[0] = (int) ((markerBottom.get(0)[0] + markerBottom.get(1)[0]) / 2);
+				carMarker[1] = (int) ((markerBottom.get(0)[1] + markerBottom.get(1)[1]) / 2); 
+				break;
+		}
+
+		Imgproc.circle(video, new Point(carMarker[0], carMarker[1]), 5, new Scalar(0, 0, 255));
+
 		carAngle = degree;
-/*
-		if(!video.empty()) { vertexFrame.render(resultVideo[2]); }
- */
+//		System.out.println(degree);
+//		Imgproc.rectangle(video, new Point(setArea[0], setArea[0]), new Point(setArea[1], setArea[1]), new Scalar(0,0,255));
+
+		/*
+		if(!video.empty()) { greenFrame.render(resultVideo[2]); }
+		Imgproc.putText(resultVideo[2], "" + carAngle, new Point(carMarker[0], carMarker[1]), 1, 2, new Scalar(255,255,255));
+		if(!video.empty()) { vertexFrame.render(resultVideo[0]); }
+		 */
 		if(!video.empty()) { vertexFrame.render(video); } 
+
 	}
 	
-	public static int[] find_marker() {
+	public static double[] find_marker(int selectMarkerNum, double degree, int[] markerBottom) {
+		
+		double z[] = new double[2];
+		double a, b, c, d;
+		int selectmin;
+		int farMarkerNum;
+		double r;
+		double x[] = new double[2];
+		double y[] = new double[2];
+		double distance[] = new double[2];
+		int listPoint[][] = new int[2][2];
+		if(selectMarkerNum == 0)
+			farMarkerNum = 1;
+		else
+			farMarkerNum = 0;
+		
+		r = markerTopSize[selectMarkerNum];
+		a = markerTop[selectMarkerNum][0];
+		b = markerTop[selectMarkerNum][1];
+		c = markerTop[farMarkerNum][0];
+		d = markerTop[farMarkerNum][1];
+		
+		if(c != a) {
+			x[0] = -Math.sqrt(r/(1 + Math.pow((d-b)/(c-a), 2))) + a;
+			y[0] = (d-b)/(c-a)*(x[0]-a) + b;			
+			x[1] = Math.sqrt(r/(1 + Math.pow((d-b)/(c-a), 2))) + a;
+			y[1] = (d-b)/(c-a)*(x[1]-a) + b;
+		}
+		else {
+			x[0] = a;
+			y[0] = - Math.sqrt(r) + b;			
+			x[1] = a;
+			y[1] = Math.sqrt(r) + b;
+		}
+		listPoint[0][0] = (int)x[0];
+		listPoint[0][1] = (int)y[0];
+		listPoint[1][0] = (int)x[1];
+		listPoint[1][1] = (int)y[1];
+		
+		distance[0] = getDistance(listPoint[0], markerBottom);
+		distance[1] = getDistance(listPoint[1], markerBottom);
+		if(distance[0] > distance[1])
+			selectmin = 1;
+		else
+			selectmin = 0;
+		
+		z[0] = x[selectmin];
+		z[1] = y[selectmin];
+		/*
 		dist_x[0] = tempxPoint[0][0] - tempxPoint[0][1];
 		dist_y[0] = tempyPoint[0][0] - tempyPoint[0][1];
 		dist_x[1] = tempxPoint[0][1] - tempxPoint[0][2];
@@ -216,7 +278,6 @@ public class CarDetector {
 		}
 		
 		int cnt = 0;
-		int a[] = new int[2];
 		for(int k = 8; k > 0 ; k-- ) {
 			for(int l = 0; l < k-1 ; l++) {
 				cnt++;
@@ -238,11 +299,13 @@ public class CarDetector {
 		for(int k = 0; k<8; k++) {
 //			System.out.println("[" + k + "]" + dist_temp[k]);
 		}
-		
+		*/
 //		System.out.println(a[0]);
 //		System.out.println(a[1]);
-		return a;
+		return z;
 	}
+	
+	
 	
 	public static int[] getMarkerPoint(int size) {
 		int[] point = new int[2];
@@ -268,5 +331,5 @@ public class CarDetector {
 
 	public static double getCarAngle() {
 		return carAngle;
-	}	
+	}
 }

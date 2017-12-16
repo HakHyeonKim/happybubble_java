@@ -27,6 +27,7 @@ public class Algoritm extends SocketTest {
 	public static double x_length;
 	public static double y_length;
 	public static double xpixel_length, ypixel_length;
+	public static int start_point = 0;
 
 	public static void Algo(int[] marker1) {
 		// TODO Auto-generated method stub
@@ -61,6 +62,8 @@ public class Algoritm extends SocketTest {
 		g = i;
 		h = j;
 
+		pen = 1;
+		
 		pathList.add(pen);
 		pathList.add(i);
 		pathList.add(j);
@@ -85,7 +88,7 @@ public class Algoritm extends SocketTest {
 				double preAngle = AngleList.get(a + 1);
 				int upPen = penList.get(a);
 				// System.out.println(angle + " / " + preAngle);
-				if (angle == preAngle && upPen == 0) {
+				if (angle == preAngle) {
 					penList.remove(a);
 					Points.remove(a);
 					AngleList.remove(a);
@@ -212,10 +215,16 @@ public class Algoritm extends SocketTest {
 	}
 
 	public static void minDistance(int g, int h, int check_path) {
-		P StartP = new P(h, g);
-		/*
-		 * System.out.println("½ÃÀÛ ÁÂÇ¥°ª:(" + (int)StartP.x+","+ (int)StartP.y+")");
-		 */
+		P StartP;
+		if (start_point == 0) {
+			StartP = new P(j, i);
+			start_point++;
+		}
+		else 
+			StartP = new P(i, j);
+		
+		System.out.println("½ÃÀÛ ÁÂÇ¥°ª:(" + (int)StartP.x+","+ (int)StartP.y+")");
+		 
 		double min = 10000;
 
 		for (int a = 0; a < input.length; a++) {
@@ -284,8 +293,8 @@ public class Algoritm extends SocketTest {
 			 * System.out.println("("+i+","+j+") > ("+g+","+h+")");
 			 */
 
-			P startP = new P(i, j);
-			P points = new P(g, h);
+			P startP = new P(j, i);
+			P points = new P(h, g);
 
 			newdegree = getAngle(j, i, h, g);
 

@@ -24,13 +24,13 @@ public class SetArea {
 		Mat resultVideo = new Mat();
 		Mat mask = new Mat();
 		MatOfPoint2f approxTemp = new MatOfPoint2f();
-		int sensitivity = 25;
+		int sensitivity = 15;
 		int idx = 0;
 		Boolean test = false;
 		Imgproc.resize(video, video, new Size(700,700));
 		
 		Imgproc.cvtColor(video, blackVideo, Imgproc.COLOR_BGR2HSV);
-		Core.inRange(blackVideo, new Scalar(120 - sensitivity, 100, 100, 0), new Scalar(120 + sensitivity, 255, 255, 0),mask);
+		Core.inRange(blackVideo, new Scalar(120 - sensitivity, 90, 90, 0), new Scalar(120 + sensitivity, 255, 255, 0),mask);
 		video.copyTo(resultVideo, mask);
 
 		// 그레이스케일 이미지로 변환
@@ -49,19 +49,19 @@ public class SetArea {
 			Mat checkArea = new Mat();
 			approx.convertTo(checkArea, CvType.CV_32S);
 			double areaSize = Math.abs(Imgproc.contourArea(checkArea));
-			if (areaSize > 100 && areaSize < 2000) {
+			if (areaSize > 300 && areaSize < 2000) {
 				int size = approx.rows();
 				int[] getPoint = new int[2];
 				getPoint = getMarkerPoint(size);
-				
-				if (checkMarker(getPoint) && (size == 3 || size == 4)) {
+				Imgproc.putText(resultVideo, "" + areaSize, new Point(getPoint[0], getPoint[1]), 1, 2, new Scalar(0,0,255));
+				Imgproc.drawContours(resultVideo, contours, i, new Scalar(0, 0, 255));
+				//if (checkMarker(getPoint) && (size == 3 || size == 4)) {
 					System.out.println(idx + " - OK");
 					// Imgproc.circle(video, new Point(getPoint[0], getPoint[1]), 10, new Scalar(0, 255, 255));
-					Imgproc.drawContours(resultVideo, contours, i, new Scalar(0, 0, 255));
 					marker[idx][0] = getPoint[0];
 					marker[idx++][1] = getPoint[1];
 					if(idx == 4)	test = true;
-				}
+				//}
 				/*
 				if (size == 5) {
 					getPoint = getMarkerPoint(size);
@@ -114,9 +114,7 @@ public class SetArea {
 		    MatOfPoint2f dst = new MatOfPoint2f(new Point(0, 0), new Point(w-1,0), new Point(0,h-1), new Point(w-1,h-1));
 		    Mat wrapMat = Imgproc.getPerspectiveTransform(src,dst);
 		    Imgproc.warpPerspective(video, video, wrapMat, video.size());
-			if(!video.empty()) { 
-				vertexFrame.render(video);
-			}
+			if(!video.empty()) { vertexFrame.render(video);	}
 			
 		}
 		return test;

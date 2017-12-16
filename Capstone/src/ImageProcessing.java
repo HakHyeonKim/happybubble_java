@@ -37,9 +37,14 @@ public class ImageProcessing {
 	public static jssctest rcCar;
 	public static int[][] marker1 = new int[4][2];
 	public static int[] car_marker = new int[2];
-	static VideoFrame colorFrame = new VideoFrame();
-	static VideoFrame byteFrame = new VideoFrame();
-
+//	static VideoFrame colorFrame = new VideoFrame();
+//	static VideoFrame byteFrame = new VideoFrame();
+	final static int carSize = 100;
+	final static int videoSize = 700;
+	final static int[] setArea = {carSize, videoSize - carSize};
+	final static int pixelUnit = 100;
+	public static int car_x, car_y;
+	
 	static {
 		String opencvPath = "C:\\opencv\\build\\java\\x64\\";
 		System.load(opencvPath + Core.NATIVE_LIBRARY_NAME + ".dll");
@@ -51,8 +56,8 @@ public class ImageProcessing {
 		if (!cap.isOpened())
 			System.exit(-1);
 
-		colorFrame.setVisible(true);
-		byteFrame.setVisible(true);
+//		colorFrame.setVisible(true);
+//		byteFrame.setVisible(true);
 
 		video = new Mat();
 		blackVideo = new Mat();
@@ -69,8 +74,6 @@ public class ImageProcessing {
 		CarDetector car_mark = new CarDetector();
 		Boolean areaChk = false;
 		while (true) {
-			int diffX = 0;
-			int diffY = 0;
 			cap.read(video);
 			areaChk = set_area.set_a(video);
 			marker1 = set_area.getMarker();
@@ -80,8 +83,7 @@ public class ImageProcessing {
 			}
 		}
 
-		int stack = 0;
-		car_detection(car_mark, cap, 3);
+		car_detection(car_mark, cap, 5, -1);
 
 		sizeSet();
 		Algoritm.Algo(car_marker);
@@ -115,7 +117,9 @@ public class ImageProcessing {
 			System.out.println("get : " + AngleList.get(i));
 			
 			while(j == 0) {
-				car_detection(car_mark, cap, 2);
+				car_detection(car_mark, cap, 0, i);
+				car_x = car_marker[0];
+				car_y = car_marker[1];
 				//car_point();
 
 //				if (AngleList.get(i) == angle) {			
@@ -126,34 +130,47 @@ public class ImageProcessing {
 					//System.out.println("D");
 				}
 			}
-			
-			while(true) {
-				car_detection(car_mark, cap, 2);
-//				System.out.println("get : " + AngleList.get(i));
-//				System.out.println("car : " + angle);
 
-				if (AngleList.get(i) <= angle + 0.5 && AngleList.get(i) >= angle - 0.5) {
-					System.out.println("car : " + angle);
-					break;
-				}
-				else if(AngleList.get(i) == 180 && -AngleList.get(i) <= angle + 0.5 && angle < 0) {
-					System.out.println("car : " + angle);
-					break;
-				}
-							
-				if(AngleList.get(i) == 180.0) {
-					if(angle > 0) // 차각이 더 큼
-						turn_left();
-					else if(angle < 0) // 차각이 더 작음
+			if (!(AngleList.get(i) <= angle + 0.5 && AngleList.get(i) >= angle - 0.5)) {
+				while(true) {
+					try {
+						Thread.sleep(150);
+					}catch(Exception e) {
+						e.printStackTrace();
+					}
+					car_detection(car_mark, cap, 0, i);
+	//				System.out.println("get : " + AngleList.get(i));
+	//				System.out.println("car : " + angle);
+	
+					if (AngleList.get(i) <= angle + 0.5 && AngleList.get(i) >= angle - 0.5) {
+						System.out.println("완료 car : " + angle);
+						break;
+					}
+					else if(AngleList.get(i) == 180 && -AngleList.get(i) >= angle - 0.5 && angle < 0) {
+						System.out.println("완료 car : " + angle);
+						break;
+					}
+								
+					if(AngleList.get(i) == 180.0) {
+						if(angle > 0) // 차각이 더 큼
+							turn_left();
+						else if(angle < 0) // 차각이 더 작음
+							turn_right();
+					}
+					else if(AngleList.get(i) < angle - 0.5) // 차각이 더 큼
 						turn_right();
+					else if(AngleList.get(i) > angle + 0.5) // 차각이 더 작음
+						turn_left();
 				}
-				else if(AngleList.get(i) < angle - 0.5) // 차각이 더 큼
-					turn_right();
-				else if(AngleList.get(i) > angle + 0.5) // 차각이 더 작음
-					turn_left();
 			}
 			
+			try {
+				Thread.sleep(1500);
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
 
+			car_detection(car_mark, cap, 0, i);
 			if (penList.get(i) == 0) {
 				rcCar.getOrder("C");
 				try {
@@ -161,8 +178,7 @@ public class ImageProcessing {
 				}catch(Exception e) {
 					e.printStackTrace();
 				}
-				rcCar.getOrder("X");
-//				
+				rcCar.getOrder("X");				
 				//System.out.println("w-");
 				// w
 			} else if (penList.get(i) == 1) {
@@ -173,16 +189,65 @@ public class ImageProcessing {
 					e.printStackTrace();
 				}
 				rcCar.getOrder("X");
-//				rcCar.getOrder("S");
 				//System.out.println("W");
 				// W
 			}
+			
+			double check_out, min = 10000;
+			int gap_x, gap_y;
+			int num = 0, vaild = 3;
+			
 			while(true) {
-				car_detection(car_mark, cap, 0);
+				car_detection(car_mark, cap, 0, i);
 				if (tolerance(i) == 2) {
 					rcCar.getOrder("S");
+					i++;
 					break;
 				}
+				
+				check_out = distance(i);
+				/*
+				if(min == 10000 && check_out < 10) {
+					vaild = 2;
+				}
+				*/
+				if(check_out > min) {
+					num++;
+				}
+				else {
+					min = check_out;
+					num = 0;
+				}
+				System.out.println("min : " + min + " , num : "+num);
+				
+				if(num == vaild) {
+					rcCar.getOrder("S");
+					System.out.println("out");
+					gap_x = (int) Points.get(i).x - car_marker[0];
+					gap_y = (int) Points.get(i).y - car_marker[1];
+					i++;
+//					System.out.println("gap : " + gap_x + ", " + gap_y);
+//					System.out.println("pre : " + Points.get(i).x + ", " + Points.get(i).y);
+					P change_p = new P(Points.get(i).x-gap_x, Points.get(i).y-gap_y);
+					Points.set(i, change_p);
+//					System.out.println("aft : " + Points.get(i).x + ", " + Points.get(i).y);
+//					AngleList.set(i, change_angle(car_marker[0], car_marker[1], Points.get(i).x, Points.get(i).y));
+//					System.out.println(change_angle(car_marker[0], car_marker[1], Points.get(i).x, Points.get(i).y));
+//					System.out.println(AngleList.get(i));
+					break;
+				}
+				
+	/*			
+				if(set_correct(i) == 3) {
+					rcCar.getOrder("S");
+					System.out.println("out");
+					//i++;
+					AngleList.set(i, change_angle(car_marker[0], car_marker[1], Points.get(i).x, Points.get(i).y));
+					//System.out.println(""+car_marker[0]+" / "+ car_marker[1]+" / "+ Points.get(i).x +" / "+ Points.get(i).y);
+					//System.out.println(change_angle(car_marker[0], car_marker[1], Points.get(i).x, Points.get(i).y));
+					break;
+				}
+				*/
 				//펜, 전진
 				//car_point();
 /*					
@@ -193,8 +258,7 @@ public class ImageProcessing {
 					}
 */
 			}
-				
-			i++;
+			//i++;
 		}
 	}
 
@@ -211,7 +275,7 @@ public class ImageProcessing {
 	public static void turn_right() {
 		rcCar.getOrder("D");
 		try {
-			Thread.sleep(100);
+			Thread.sleep(130);
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -219,8 +283,14 @@ public class ImageProcessing {
 	}
 	public static int tolerance(int i) {
 		int a = 0;
-		System.out.println(Points.get(i).x + ", " + Points.get(i).y);
-		System.out.println(car_marker[0] + ", " + car_marker[1]);
+		//int[] translateMarker = new int[2];
+		//int cordLength = (setArea[0] - setArea[1]) / pixelUnit;
+		//translateMarker[0] = (car_marker[0] - setArea[0]) / cordLength;
+		//translateMarker[1] = (car_marker[1] - setArea[0]) / cordLength;
+		//System.out.println("get : " + Points.get(i).x + ", " + Points.get(i).y);
+		//System.out.println("car : " + car_marker[0] + ", " + car_marker[1]);
+		//System.out.println("tca : " + translateMarker[0] + ", " + translateMarker[1]);
+//		if (Points.get(i).x <= (car_marker[0] + 2) && Points.get(i).x >= (car_marker[0] - 2)) {
 		if (Points.get(i).x <= (car_marker[0] + 1) && Points.get(i).x >= (car_marker[0] - 1)) {
 			a++;
 		}
@@ -228,6 +298,69 @@ public class ImageProcessing {
 			a++;
 		}
 		return a;
+	}
+/*	
+	public static int set_correct(int i) {
+		int a = 0;
+		//목적지보다  x,y가 작은 위치에서 이동하는 경우
+		if(car_x < Points.get(i).x && car_y < Points.get(i).y) {
+			if(car_marker[0] > Points.get(i).x + 2 || car_marker[1] > Points.get(i).y + 2) {
+				a = 3;
+			}
+		}
+		//목적지 보다 x는 작은 위치, y는  큰 위치에서 이동
+		if(car_x < Points.get(i).x && car_y > Points.get(i).y) {
+			if(car_marker[0] > Points.get(i).x + 2 || car_marker[1] < Points.get(i).y - 2) {
+				a = 3;
+			}
+		}
+		//목적지보다 x는 큰위치, y는 작은 위치에서 이동
+		if(car_x > Points.get(i).x && car_y < Points.get(i).y) {
+			if(car_marker[0] < Points.get(i).x - 2 || car_marker[1] > Points.get(i).y + 2) {
+				a = 3;
+			}
+		}
+		
+		//목적지보다 x,y가 큰 위치에서 이동
+		if(car_x > Points.get(i).x && car_y > Points.get(i).y) {
+			if(car_marker[0] < Points.get(i).x - 2|| car_marker[1] < Points.get(i).y - 2) {
+				a = 3;
+			}
+		}
+		return a;
+	}
+*/	
+	public static double distance(int i) {
+		double dis;
+		dis = Math.sqrt((Points.get(i).x - car_marker[0])*(Points.get(i).x - car_marker[0]) + (Points.get(i).y - car_marker[1])*(Points.get(i).y - car_marker[1]));
+		
+		dis = Math.round(dis * 1000) / 1000;
+		
+		return dis;
+	}
+	
+	public static double change_angle(int x1, int y1, double x2, double y2) {
+		double dx = x1 - x2;
+		double dy = y1 - y2;
+		
+		System.out.println("dx : "+ dx);
+		System.out.println("dy : "+ dy);
+/*		
+		double rad = Math.atan2(dx, dy);
+		double degree = (rad * 180) / Math.PI;
+
+		degree = Math.round(degree * 1000) / 1000.0;
+*/
+		double rad = Math.atan2(dx, dy);
+		double degree = ((rad * 180) / Math.PI);
+		if(degree >= 0) {
+			degree = 180 - degree;
+			degree = -degree;
+		} else {
+			degree = degree + 180;
+		}
+		
+		return degree;
 	}
 
 	public static void sizeSet() {
@@ -238,9 +371,10 @@ public class ImageProcessing {
 	}
 
 	public static void show_view() {
+		Imgproc.rectangle(video, new Point(setArea[0], setArea[0]), new Point(setArea[1], setArea[1]), new Scalar(0,0,255));
 		if (!video.empty()) {
 //			Imgproc.resize(video, video, new Size(500,500));
-			colorFrame.render(video);
+//			colorFrame.render(video);
 		} else
 			System.out.println("no frame");
 	}
@@ -259,9 +393,11 @@ public class ImageProcessing {
 		}
 	}
 
-	public static void car_detection(CarDetector car_mark, VideoCapture cap, int vaild) {
+	public static void car_detection(CarDetector car_mark, VideoCapture cap, int vaild, int idx) {
 		int[] car_markerTemp = {0, 0};
 		int a = 0;
+		int[] translateMarker = new int[2];
+		int cordLength = (setArea[1] - setArea[0]) / pixelUnit;
 		while(true) {
 			cropArea(cap);
 			car_mark.CarDetect(video);
@@ -275,12 +411,19 @@ public class ImageProcessing {
 			}
 			if(a >= vaild)
 				break;
-			show_view();
+//			show_view();
 		}
-		
-		int[] sendCarMarker = new int[2];
-		sendCarMarker[0] = car_marker[0];
-		sendCarMarker[1] = car_marker[1];
+		if(idx != -1)
+			Imgproc.circle(video, new Point(Points.get(idx).x, Points.get(idx).y), 3, new Scalar(255, 0, 0));
+
+
+//		System.out.println("car : " + car_marker[0] + ", " + car_marker[1]);
+		translateMarker[0] = (car_marker[0] - setArea[0]) / cordLength;
+		translateMarker[1] = (car_marker[1] - setArea[0]) / cordLength;
+		car_marker[0] = translateMarker[0];
+		car_marker[1] = translateMarker[1];
+//		System.out.println("trc : " + car_marker[0] + ", " + car_marker[1]);
+
 //		System.out.println("Center : " + sendCarMarker[0] + " , " + sendCarMarker[1]);
 		// 좌 A 우D 후진X 전진 펜o W 펜x w 멈춤 S
 		/*

@@ -7,7 +7,7 @@ public class Draw extends JPanel implements ActionListener {
 
 	public static ArrayList<Integer> list = new ArrayList<Integer>();
 
-	Timer time = new Timer(50, (ActionListener) this);
+	Timer time = new Timer(100, (ActionListener) this);
 	int a = 0;
 	int b = 3;
 	int s = 7;
