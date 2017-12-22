@@ -11,44 +11,44 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 public class CarDetector {
-	public final static int[] markerMaxSize = {1000, 1000, 390};
-	public final static int[] markerMinSize = {400, 100, 100};
-	public final static int[] panelSize = {700, 700};
-	public final static int settingWidth = 100;
-	public final static int settingHeight = 100;
-	public final static Scalar[] colorRangeMin = {
+	public final static int[] marker_max_size = {1000, 1000, 390};
+	public final static int[] marker_min_size = {400, 100, 100};
+	public final static int[] panel_size = {700, 700};
+	public final static int setting_width = 100;
+	public final static int setting_height = 100;
+	public final static Scalar[] color_range_min = {
 			new Scalar(50, 70, 70, 0)
 			, new Scalar(0, 75, 75)
 			, new Scalar(50, 70, 70, 0)};
-	public final static Scalar[] colorRangeMax = {
+	public final static Scalar[] color_range_max = {
 			new Scalar(100, 255, 255, 0)
 			, new Scalar(50, 255, 255)
 			, new Scalar(100, 255, 255, 0)};
-	final static int carSize = 100;
-	final static int videoSize = 700;
-	final static int[] setArea = {carSize, videoSize - carSize};
+	final static int car_size = 100;
+	final static int video_size = 700;
+	final static int[] set_area = {car_size, video_size - car_size};
 
-	public static VideoFrame vertexFrame = new VideoFrame();
+	public static VideoFrame vertex_frame = new VideoFrame();
 	public static List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 	public static MatOfPoint2f approx = new MatOfPoint2f();
-	public static int[] carMarker = new int[2]; // RC car 좌표 (펜의 좌표)
-	public static double carAngle; // RC car 각도
+	public static int[] car_marker = new int[2]; // RC car 좌표 (펜의 좌표)
+	public static double car_angle; // RC car 각도
 	
-	public static int[][] topMarker = new int[2][2]; // 상단의 녹색 사각형 
+	public static int[][] top_marker = new int[2][2]; // 상단의 녹색 사각형 
 	public static double[] topCenter = new double[2]; // 녹색 사각형의 중점
-	public static double[] topMarkerSize = new double[2]; // 상단 녹색 사각형 영역
-	public static ArrayList<int[]> markerBottom = new ArrayList<int[]>(); // 하단의 노란 사각형
-	static int[] markerForward = new int[2]; // 상단의 앞쪽 삼각형
-	static Mat[] tempVideo = new Mat[3];
+	public static double[] top_marker_size = new double[2]; // 상단 녹색 사각형 영역
+	public static ArrayList<int[]> marker_bottom = new ArrayList<int[]>(); // 하단의 노란 사각형
+	static int[] marker_forward = new int[2]; // 상단의 앞쪽 삼각형
+	static Mat[] temp_video = new Mat[3];
 	static Mat[] mask = new Mat[3];
-	static Mat[] resultVideo = new Mat[3];
-	static Mat[] blackVideo = new Mat[3];	
+	static Mat[] result_video = new Mat[3];
+	static Mat[] black_video = new Mat[3];	
 	
 	public void CarDetect(Mat camvideo) {
 		Mat video = camvideo;
 		double degree;
-		vertexFrame.setVisible(true);
-		Imgproc.resize(video, video, new Size(panelSize[0],panelSize[1]));
+		vertex_frame.setVisible(true);
+		Imgproc.resize(video, video, new Size(panel_size[0],panel_size[1]));
 		
 		for(int j = 0;j < 3;j++) {
 			getMarker(video, j);
@@ -60,16 +60,16 @@ public class CarDetector {
 		
 		calculCarMarker(video, degree);
 
-		if(!video.empty()) { vertexFrame.render(video); } 
+		if(!video.empty()) { vertex_frame.render(video); } 
 	}
 	/*
 	 * RC car의 마커들을 인식한다. 3번 모두 잡았을 경우 인식하기 때문에 인식 오류를 최소화 한다.
 	 */
 	public static void getMarker(Mat video, int j) {
-		tempVideo[j] = new Mat();
+		temp_video[j] = new Mat();
 		mask[j] = new Mat();
-		resultVideo[j] = new Mat();
-		blackVideo[j] = new Mat();
+		result_video[j] = new Mat();
+		black_video[j] = new Mat();
 		
 		extractContour(video, j);
 		
@@ -83,24 +83,24 @@ public class CarDetector {
 			Mat checkArea = new Mat();
 			approx.convertTo(checkArea, CvType.CV_32S);
 
-			double areaSize = Math.abs(Imgproc.contourArea(checkArea));
+			double area_size = Math.abs(Imgproc.contourArea(checkArea));
 			
 			int size = approx.rows();
-			int[] getPoint = new int[2];	
-			getPoint = getMarkerPoint(size);
-			if (areaSize > markerMinSize[j] && areaSize <= markerMaxSize[j]) {
+			int[] get_point = new int[2];	
+			get_point = getMarkerPoint(size);
+			if (area_size > marker_min_size[j] && area_size <= marker_max_size[j]) {
 				if(j == 0 && a < 2) {
-					topMarker[a][0] = getPoint[0];
-					topMarker[a][1] = getPoint[1];
-					topMarkerSize[a] = areaSize;
+					top_marker[a][0] = get_point[0];
+					top_marker[a][1] = get_point[1];
+					top_marker_size[a] = area_size;
 	            }
 				
 				else if(j == 1 && a < 2) {
-					markerBottom.add(getPoint);
+					marker_bottom.add(get_point);
 				}
 				else if(j == 2 && a < 1) {
-					markerForward[0] = getPoint[0];
-					markerForward[1] = getPoint[1];
+					marker_forward[0] = get_point[0];
+					marker_forward[1] = get_point[1];
 				}
 				a++;
 			}
@@ -112,47 +112,47 @@ public class CarDetector {
 	 * 중점 구하기
 	 */
 	public static void getCenter() {
-		topCenter[0] = (topMarker[0][0] + topMarker[1][0]) / 2;
-		topCenter[1] = (topMarker[0][1] + topMarker[1][1]) / 2;
+		topCenter[0] = (top_marker[0][0] + top_marker[1][0]) / 2;
+		topCenter[1] = (top_marker[0][1] + top_marker[1][1]) / 2;
 	}
 	/*
 	 * 펜의좌표 연산 및 각도 구하기
 	 */
 	public static void calculCarMarker(Mat video, double degree) {
-		switch(markerBottom.size()) {
+		switch(marker_bottom.size()) {
 		case 1 :	// marker가 한 개만 보일 경우
 			double[] distance = new double[2];
 			double[] move = new double[2];
-			int selectMarkerNum; // 하단의 marker와 가까운 상단의 marker 선택
+			int select_marker_num; // 하단의 marker와 가까운 상단의 marker 선택
 			double target[] = new double[2];
 			int bottom[] = new int[2]; 
-			bottom = markerBottom.get(0);
-			distance[0] = getDistance(topMarker[0], markerBottom.get(0));
-			distance[1] = getDistance(topMarker[1], markerBottom.get(0));
-			if(distance[0] <= distance[1]) selectMarkerNum = 0;
-			else selectMarkerNum = 1;
+			bottom = marker_bottom.get(0);
+			distance[0] = getDistance(top_marker[0], marker_bottom.get(0));
+			distance[1] = getDistance(top_marker[1], marker_bottom.get(0));
+			if(distance[0] <= distance[1]) select_marker_num = 0;
+			else select_marker_num = 1;
 			
-			target = find_marker(selectMarkerNum, degree, bottom);				
+			target = find_marker(select_marker_num, degree, bottom);				
 			
 			for(int i = 0;i < 2;i++) {
-				move[i] = markerBottom.get(0)[i] - target[i];
-				carMarker[i] = (int) (topCenter[i] + move[i]);
+				move[i] = marker_bottom.get(0)[i] - target[i];
+				car_marker[i] = (int) (topCenter[i] + move[i]);
 			}
 			break;
 		case 2 : 	// marker가 두 개 모두 보일 경우
-			carMarker[0] = (int) ((markerBottom.get(0)[0] + markerBottom.get(1)[0]) / 2);
-			carMarker[1] = (int) ((markerBottom.get(0)[1] + markerBottom.get(1)[1]) / 2); 
+			car_marker[0] = (int) ((marker_bottom.get(0)[0] + marker_bottom.get(1)[0]) / 2);
+			car_marker[1] = (int) ((marker_bottom.get(0)[1] + marker_bottom.get(1)[1]) / 2); 
 			break;
 		}
-		Imgproc.circle(video, new Point(carMarker[0], carMarker[1]), 5, new Scalar(0, 0, 255));
-		carAngle = degree;		
+		Imgproc.circle(video, new Point(car_marker[0], car_marker[1]), 5, new Scalar(0, 0, 255));
+		car_angle = degree;		
 	}
 	/*
 	 * 중점과 앞쪽의 삼각형 마커를 통해 각도 계산
 	 */
 	public static double getAngle() {
-		double dx = topCenter[0] - markerForward[0];
-		double dy = topCenter[1] - markerForward[1];
+		double dx = topCenter[0] - marker_forward[0];
+		double dy = topCenter[1] - marker_forward[1];
 
 		double rad = Math.atan2(dx, dy);
 		double degree = ((rad * 180) / Math.PI);
@@ -168,39 +168,39 @@ public class CarDetector {
 	 * marker 모서리 추출
 	 */	
 	public static void extractContour(Mat video, int j) {
-		Imgproc.cvtColor(video, blackVideo[j], Imgproc.COLOR_BGR2HSV);
-		Core.inRange(blackVideo[j], colorRangeMin[j], colorRangeMax[j], mask[j]);
-		video.copyTo(resultVideo[j], mask[j]);
+		Imgproc.cvtColor(video, black_video[j], Imgproc.COLOR_BGR2HSV);
+		Core.inRange(black_video[j], color_range_min[j], color_range_max[j], mask[j]);
+		video.copyTo(result_video[j], mask[j]);
 		
-		Imgproc.cvtColor(resultVideo[j], tempVideo[j], Imgproc.COLOR_BGR2GRAY);
-		Imgproc.threshold(tempVideo[j], tempVideo[j], 200, 255, Imgproc.THRESH_OTSU | Imgproc.THRESH_BINARY);
+		Imgproc.cvtColor(result_video[j], temp_video[j], Imgproc.COLOR_BGR2GRAY);
+		Imgproc.threshold(temp_video[j], temp_video[j], 200, 255, Imgproc.THRESH_OTSU | Imgproc.THRESH_BINARY);
 
 		contours = new ArrayList<MatOfPoint>();
-		Imgproc.findContours(tempVideo[j], contours, tempVideo[j], Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);	
+		Imgproc.findContours(temp_video[j], contours, temp_video[j], Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);	
 	}
 	/*
 	 * 하단 marker와 수직한 점 찾기
 	 * 상단 marker를 지나는 직선과 하단 marker와 가까운 상단 marker를 중점으로 하는 원의 방정식을 연립해 하단 marker와 수직인 점을 찾는다
 	 */
-	public static double[] find_marker(int selectMarkerNum, double degree, int[] markerBottom) {		
+	public static double[] find_marker(int select_marker_num, double degree, int[] marker_bottom) {		
 		double z[] = new double[2];
 		double x[] = new double[2];
 		double y[] = new double[2];
 		double distance[] = new double[2];
-		int listPoint[][] = new int[2][2];
+		int list_point[][] = new int[2][2];
 		double a, b, c, d, r;
-		int selectmin, farMarkerNum;
+		int select_min, far_marker_num;
 
-		if(selectMarkerNum == 0)
-			farMarkerNum = 1;
+		if(select_marker_num == 0)
+			far_marker_num = 1;
 		else
-			farMarkerNum = 0;
+			far_marker_num = 0;
 		
-		r = topMarkerSize[selectMarkerNum]; // 상단 marker의 영역
-		a = topMarker[selectMarkerNum][0]; // 하단 marker와  근접한 상단 marker x좌표
-		b = topMarker[selectMarkerNum][1]; // 하단 marker와  근접한 상단 marker y좌표
-		c = topMarker[farMarkerNum][0]; // 하단 marker와  먼 상단 marker x좌표
-		d = topMarker[farMarkerNum][1]; // 하단 marker와  먼 상단 marker y좌표
+		r = top_marker_size[select_marker_num]; // 상단 marker의 영역
+		a = top_marker[select_marker_num][0]; // 하단 marker와  근접한 상단 marker x좌표
+		b = top_marker[select_marker_num][1]; // 하단 marker와  근접한 상단 marker y좌표
+		c = top_marker[far_marker_num][0]; // 하단 marker와  먼 상단 marker x좌표
+		d = top_marker[far_marker_num][1]; // 하단 marker와  먼 상단 marker y좌표
 		/*
 		 * 직선과 원의 방정식 해 구하기
 		 */	
@@ -218,23 +218,23 @@ public class CarDetector {
 		}
 		
 		for(int i = 0; i < 2; i++) {
-			listPoint[i][0] = (int)x[i];
-			listPoint[i][1] = (int)y[i];			
+			list_point[i][0] = (int)x[i];
+			list_point[i][1] = (int)y[i];			
 		}
 		/*
 		 * 계산 결과 나온 두 좌표 중 하단 marker와 가까운 점 선택
 		 */	
 		for(int i = 0; i < 2; i++) {
-			distance[i] = getDistance(listPoint[i], markerBottom);			
+			distance[i] = getDistance(list_point[i], marker_bottom);			
 		}
 		
 		if(distance[0] > distance[1])
-			selectmin = 1;
+			select_min = 1;
 		else
-			selectmin = 0;
+			select_min = 0;
 		
-		z[0] = x[selectmin];
-		z[1] = y[selectmin];
+		z[0] = x[select_min];
+		z[1] = y[select_min];
 
 		return z;
 	}
@@ -258,10 +258,10 @@ public class CarDetector {
     }
 	
 	public static int[] getCarMarker() {
-		return carMarker;
+		return car_marker;
 	}
 
 	public static double getCarAngle() {
-		return carAngle;
+		return car_angle;
 	}
 }
