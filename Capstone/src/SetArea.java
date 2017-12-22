@@ -13,35 +13,40 @@ import org.opencv.imgproc.Imgproc;
 public class SetArea {
 	static VideoFrame vertexFrame = new VideoFrame();
 	static MatOfPoint2f approx = new MatOfPoint2f();
-	public static int marker[][] = new int[4][2];
-	public static Point[] sortedPoint = new Point[4];
-
+	static List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+	public static int marker[][] = new int[4][2]; // 임의의 좌표 설정
+	public static Point[] sortedPoint = new Point[4]; // 영역 좌표 설정
+	static Mat tempImg = new Mat();
+	static Mat blackVideo = new Mat();
+	static Mat resultVideo = new Mat();
+	static Mat mask = new Mat();
+	static MatOfPoint2f approxTemp = new MatOfPoint2f();
+	static int sensitivity = 15; // inrange 민감도 
+	static int idx = 0; // marker index
+	public static Boolean areaSetTest = false;
+	/*
+	 * 그릴 영역 설정
+	 */
 	public Boolean set_a(Mat camvideo) {
-		vertexFrame.setVisible(true);
 		Mat video = camvideo;
-		Mat tempImg = new Mat();
-		Mat blackVideo = new Mat();
-		Mat resultVideo = new Mat();
-		Mat mask = new Mat();
-		MatOfPoint2f approxTemp = new MatOfPoint2f();
-		int sensitivity = 15;
-		int idx = 0;
-		Boolean test = false;
+		vertexFrame.setVisible(true);
 		Imgproc.resize(video, video, new Size(700,700));
 		
-		Imgproc.cvtColor(video, blackVideo, Imgproc.COLOR_BGR2HSV);
-		Core.inRange(blackVideo, new Scalar(120 - sensitivity, 90, 90, 0), new Scalar(120 + sensitivity, 255, 255, 0),mask);
-		video.copyTo(resultVideo, mask);
-
-		// 그레이스케일 이미지로 변환
-		Imgproc.cvtColor(resultVideo, tempImg, Imgproc.COLOR_BGR2GRAY);
-		Imgproc.threshold(tempImg, tempImg, 200, 255, Imgproc.THRESH_OTSU | Imgproc.THRESH_BINARY);
-
-		// contour를 찾는다.
-		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-		Imgproc.findContours(tempImg, contours, tempImg, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-
-		// contour를 근사화한다.
+		find_4_Marker(video);
+		
+		if(areaSetTest) {
+			sort_Point(video);
+			
+			if(!video.empty()) { 
+				vertexFrame.render(video);	}			
+		}
+		return areaSetTest;
+	}
+	/*
+	 * 영역 설정하는 4개의 marker 찾기
+	 */
+	public static void find_4_Marker(Mat video) {
+		extractContour(video);
 		for (int i = 0; i < contours.size(); i++) {
 			contours.get(i).convertTo(approxTemp, CvType.CV_32FC2);
 			double epsilon = Imgproc.arcLength(approxTemp, true) * 0.02;
@@ -55,87 +60,55 @@ public class SetArea {
 				getPoint = getMarkerPoint(size);
 				Imgproc.putText(resultVideo, "" + areaSize, new Point(getPoint[0], getPoint[1]), 1, 2, new Scalar(0,0,255));
 				Imgproc.drawContours(resultVideo, contours, i, new Scalar(0, 0, 255));
-				//if (checkMarker(getPoint) && (size == 3 || size == 4)) {
 					System.out.println(idx + " - OK");
-					// Imgproc.circle(video, new Point(getPoint[0], getPoint[1]), 10, new Scalar(0, 255, 255));
 					marker[idx][0] = getPoint[0];
 					marker[idx++][1] = getPoint[1];
-					if(idx == 4)	test = true;
-				//}
-				/*
-				if (size == 5) {
-					getPoint = getMarkerPoint(size);
-					// Imgproc.circle(video, new Point(getPoint[0], getPoint[1]), 10, new Scalar(0, 255, 255));
-					Imgproc.drawContours(video, contours, i, new Scalar(0, 0, 255));
-					marker[0][0] = getPoint[0];
-					marker[0][1] = getPoint[1];
-					markerChk[0] = true;
+					if(idx == 4)	areaSetTest = true;
 				}
-				else if (size == 12) {
-					getPoint = getMarkerPoint(size);
-					// Imgproc.circle(video, new Point(getPoint[0], getPoint[1]), 10, new Scalar(0, 255, 255));
-					Imgproc.drawContours(video, contours, i, new Scalar(0, 0, 255));
-					marker[1][0] = getPoint[0];
-					marker[1][1] = getPoint[1];
-					markerChk[1] = true;
-				}
-				else if (size == 3) {
-					getPoint = getMarkerPoint(size);
-					// Imgproc.circle(video, new Point(getPoint[0], getPoint[1]), 10, new Scalar(0, 255, 255));
-					Imgproc.drawContours(video, contours, i, new Scalar(0, 0, 255));
-					marker[2][0] = getPoint[0];
-					marker[2][1] = getPoint[1];
-					markerChk[2] = true;
-				}
-				*/
-			}
 			if(!video.empty()) { vertexFrame.render(resultVideo); }	
 		}
-		if(test) {
-			int[] centerPoint = new int[2];
-			
-			centerPoint[0] = (marker[0][0] + marker[1][0] + marker[2][0] + marker[3][0]) / 4;
-			centerPoint[1] = (marker[0][1] + marker[1][1] + marker[2][1] + marker[3][1]) / 4;
-			
-			for(int i = 0;i < marker.length;i++) {
-				if(marker[i][0] < centerPoint[0] && marker[i][1] < centerPoint[1])
-					sortedPoint[0] = new Point(marker[i][0], marker[i][1]);
-				else if(marker[i][0] > centerPoint[0] && marker[i][1] < centerPoint[1])
-					sortedPoint[1] = new Point(marker[i][0], marker[i][1]);
-				else if(marker[i][0] < centerPoint[0] && marker[i][1] > centerPoint[1])
-					sortedPoint[2] = new Point(marker[i][0], marker[i][1]);
-				else if(marker[i][0] > centerPoint[0] && marker[i][1] > centerPoint[1])
-					sortedPoint[3] = new Point(marker[i][0], marker[i][1]);
-			}
-			setSortedPoint(sortedPoint);
-		    MatOfPoint2f src = new MatOfPoint2f(sortedPoint[0], sortedPoint[1], sortedPoint[2],sortedPoint[3]);
-		    int w = video.cols();
-		    int h = video.rows();
-		    MatOfPoint2f dst = new MatOfPoint2f(new Point(0, 0), new Point(w-1,0), new Point(0,h-1), new Point(w-1,h-1));
-		    Mat wrapMat = Imgproc.getPerspectiveTransform(src,dst);
-		    Imgproc.warpPerspective(video, video, wrapMat, video.size());
-			if(!video.empty()) { vertexFrame.render(video);	}
-			
+	}
+	/*
+	 * marker 모서리 추출
+	 */
+	public static void extractContour(Mat video) {
+		Imgproc.cvtColor(video, blackVideo, Imgproc.COLOR_BGR2HSV);
+		Core.inRange(blackVideo, new Scalar(120 - sensitivity, 90, 90, 0), new Scalar(120 + sensitivity, 255, 255, 0),mask);
+		video.copyTo(resultVideo, mask);
+
+		Imgproc.cvtColor(resultVideo, tempImg, Imgproc.COLOR_BGR2GRAY);
+		Imgproc.threshold(tempImg, tempImg, 200, 255, Imgproc.THRESH_OTSU | Imgproc.THRESH_BINARY);
+
+		Imgproc.findContours(tempImg, contours, tempImg, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+	}
+	/*
+	 * 4개의 임의의 index marker를 순서대로 indexing하기 
+	 */
+	public static void sort_Point(Mat video) {
+		int[] centerPoint = new int[2];
+		
+		centerPoint[0] = (marker[0][0] + marker[1][0] + marker[2][0] + marker[3][0]) / 4;
+		centerPoint[1] = (marker[0][1] + marker[1][1] + marker[2][1] + marker[3][1]) / 4;
+		
+		for(int i = 0;i < marker.length;i++) {
+			if(marker[i][0] < centerPoint[0] && marker[i][1] < centerPoint[1])
+				sortedPoint[0] = new Point(marker[i][0], marker[i][1]);
+			else if(marker[i][0] > centerPoint[0] && marker[i][1] < centerPoint[1])
+				sortedPoint[1] = new Point(marker[i][0], marker[i][1]);
+			else if(marker[i][0] < centerPoint[0] && marker[i][1] > centerPoint[1])
+				sortedPoint[2] = new Point(marker[i][0], marker[i][1]);
+			else if(marker[i][0] > centerPoint[0] && marker[i][1] > centerPoint[1])
+				sortedPoint[3] = new Point(marker[i][0], marker[i][1]);
 		}
-		return test;
+		setSortedPoint(sortedPoint);
+	    MatOfPoint2f src = new MatOfPoint2f(sortedPoint[0], sortedPoint[1], sortedPoint[2],sortedPoint[3]);
+	    int w = video.cols();
+	    int h = video.rows();
+	    MatOfPoint2f dst = new MatOfPoint2f(new Point(0, 0), new Point(w-1,0), new Point(0,h-1), new Point(w-1,h-1));
+	    Mat wrapMat = Imgproc.getPerspectiveTransform(src,dst);
+	    Imgproc.warpPerspective(video, video, wrapMat, video.size());
 	}
 	
-	public static Point[] getSortedPoint() {
-		return sortedPoint;
-	}
-
-	public static void setSortedPoint(Point[] sortedPoint) {
-		SetArea.sortedPoint = sortedPoint;
-	}
-
-	public int[][] getMarker() {
-		return marker;
-	}
-
-	public static void setMarker(int[][] marker) {
-		SetArea.marker = marker;
-	}
-
 	public static int[] getMarkerPoint(int size) {
 		int[] point = new int[2];
 		int x = 0, y = 0;
@@ -150,28 +123,12 @@ public class SetArea {
 		return point;
 	}
 	
-	public static Boolean checkMarker(int[] point) {
-		Boolean chk = true;
-		int diffX = 0;
-		int diffY = 0;
-		for(int i = 0;i < marker.length;i++) {
-			diffX = Math.abs(marker[i][0] - point[0]);
-			diffY = Math.abs(marker[i][1] - point[1]);
-			if(diffX <= 50 && diffY <= 50)	chk = false;
-		}
-		
-		return chk;
+	public static Point[] getSortedPoint() {
+		return sortedPoint;
+	}
+
+	public static void setSortedPoint(Point[] sortedPoint) {
+		SetArea.sortedPoint = sortedPoint;
 	}
 	
-	public static int[] swapPoint(int[] point, int index) {
-		int[] pointTemp = new int[2];
-		pointTemp[0] = marker[index][0];
-		pointTemp[1] = marker[index][1];
-		marker[index][0] = point[0];
-		marker[index][1] = point[1];
-		point[0] = pointTemp[0];
-		point[1] = pointTemp[1];
-		
-		return point;
-	}
 }
