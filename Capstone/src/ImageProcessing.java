@@ -34,7 +34,7 @@ public class ImageProcessing {
 	public static ArrayList<Integer> penList = new ArrayList<Integer>();
 	public static ArrayList<P> Points = new ArrayList<P>();
 	public static ArrayList<Double> AngleList = new ArrayList<Double>();
-	public static jssctest rcCar;
+	public static ArduinoControl rcCar;
 	public static int[][] marker1 = new int[4][2];
 	public static int[] car_marker = new int[2];
 //	static VideoFrame colorFrame = new VideoFrame();
@@ -100,7 +100,7 @@ public class ImageProcessing {
 		System.out.println(matrixXSize + "/" + matrixYSize);
 		*/
 		
-		rcCar = new jssctest();
+		rcCar = new ArduinoControl();
 		rcCar.jssc();
 		
 		int i = 0;

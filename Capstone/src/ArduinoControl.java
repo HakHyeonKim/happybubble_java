@@ -1,7 +1,7 @@
 import jssc.SerialPort;
 import jssc.SerialPortList;
 
-public class jssctest {
+public class ArduinoControl {
 	static String order;
 	Thread write;
 	static SerialPort serialPort = new SerialPort("COM3");

@@ -5,7 +5,7 @@ import javax.swing.JFrame;
 
 //È¥ÇÕ ÀÚ¹Ù
 
-public class Algoritm extends SocketTest {
+public class Algoritm extends SocketComm {
 	public static ArrayList<Integer> penList = new ArrayList<Integer>();
 	public static ArrayList<P> Points = new ArrayList<P>();
 	public static ArrayList<Double> AngleList = new ArrayList<Double>();
@@ -32,9 +32,9 @@ public class Algoritm extends SocketTest {
 	public static void Algo(int[] marker1) {
 		// TODO Auto-generated method stub
 
-		new SocketTest();
+		new SocketComm();
 
-		input = FindVertex.pattern(SocketTest.getImgToArr());
+		input = FindVertex.pattern(SocketComm.getImgToArr());
 
 		for (int c = 0; c < input.length; c++) {
 			for (int r = 0; r < input[0].length; r++) {

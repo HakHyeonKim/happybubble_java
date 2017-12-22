@@ -9,15 +9,15 @@ import javax.imageio.ImageIO;
 import java.io.ByteArrayInputStream;
 import java.awt.image.BufferedImage;
 
-public class SocketTest {
+public class SocketComm {
 
 	public static final int port = 8765;
 	public static int[][] imgToArr;
 	public static int error = 0;
 
-	public SocketTest() {
+	public SocketComm() {
 		ServerSocket serverSocket = null;
-		Socket socket = null;
+		java.net.Socket socket = null;
 
 		try {
 			System.out.println("수신 대기 중");
@@ -31,7 +31,6 @@ public class SocketTest {
 
 		while (true) {
 			try {
-
 				System.out.println("수신 대기 중");
 
 				InputStream in = socket.getInputStream();
@@ -39,7 +38,6 @@ public class SocketTest {
 				byte[] sizeArr = new byte[4];
 				in.read(sizeArr);
 				int imgSize = getInt(sizeArr);
-				System.out.println("이미지 사이즈 : " + imgSize);
 				byte[] arrImg = new byte[imgSize];
 				in.read(arrImg);
 
@@ -47,7 +45,7 @@ public class SocketTest {
 				BufferedImage bImg = ImageIO.read(convertImgStream);
 				bImg.flush();
 
-				File outputfile = new File("test.png");
+				File outputfile = new File("binary_img.png");
 				ImageIO.write(bImg, "png", outputfile);
 
 				imgToArr = new int[bImg.getWidth()][bImg.getHeight()];
@@ -58,13 +56,10 @@ public class SocketTest {
 					for (int j = 0; j < bImg.getHeight(); j++) {
 						if (bImg.getRGB(i, j) == -1) {
 							imgToArr[i][j] = 9;
-							// System.out.print("1 ");
 						} else {
 							imgToArr[i][j] = 0;
-							// System.out.print("0 ");
 						}
 					}
-					// System.out.println("");
 				}
 				System.out.println("이미지 수신 완료");
 				byte[] arrPaperWidth = new byte[4];
