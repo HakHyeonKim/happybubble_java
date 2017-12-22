@@ -21,6 +21,7 @@ public class FindVertex {
 	public static int[][] pattern(int[][] input) {
 		int[][] imgArr = input;
 
+		// 이미지를 역전시키기 위해 array 복제
 		int[][] tempArr = new int[imgArr.length][imgArr[0].length];
 		for (int i = 0; i < imgArr.length; i++) {
 			for (int j = 0; j < imgArr[0].length; j++) {
@@ -31,13 +32,16 @@ public class FindVertex {
 		Mat tempImg = new Mat();
 		MatOfPoint approxTemp = new MatOfPoint();
 		while (true) {
+			// contours를 찾기 위해 이미지 이진화
 			Imgproc.cvtColor(vertexImg, tempImg, Imgproc.COLOR_BGR2GRAY);
 			Imgproc.threshold(tempImg, tempImg, 200, 255, Imgproc.THRESH_OTSU | Imgproc.THRESH_BINARY);
+			// contours 찾기
 			List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 			List<Point> curve = new Vector<Point>();
 			Imgproc.findContours(tempImg, contours, tempImg, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_NONE);
 			int[] xy = new int[2];
 
+			// contours가 찾아진 좌표에 대해 값 변환
 			if (contours.size() == 0)
 				break;
 			for (int i = 0; i < contours.size(); i++) {
@@ -57,6 +61,7 @@ public class FindVertex {
 				intPattern++;
 		}
 
+		// 역전된 이미지이기 때문에 전체 배열 역전
 		for (int i = 0; i < imgArr.length; i++) {
 			for (int j = 0; j < imgArr[0].length; j++) {
 				imgArr[imgArr.length - 1 - i][j] = tempArr[i][j];
