@@ -14,11 +14,15 @@ public class SocketComm {
 	public static final int port = 8765;
 	public static int[][] imgToArr;
 	public static int error = 0;
-
+	/*
+	 * 안드로이드와 자바의 서버 통신을 위한 부분
+	 */
 	public SocketComm() {
 		ServerSocket serverSocket = null;
 		java.net.Socket socket = null;
-
+		/*
+		 * 안드로이드에서 그리려는 이미지를 넘겨받기 위해 대기
+		 */
 		try {
 			System.out.println("수신 대기 중");
 			serverSocket = new ServerSocket(port);
@@ -28,7 +32,9 @@ public class SocketComm {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
-
+		/*
+		 * 안드로이드로부터 이미지 전송이 원활하지 않아 오류 발생시 성공할 때까지 반복해서 통신
+		 */
 		while (true) {
 			try {
 				System.out.println("수신 대기 중");
@@ -74,7 +80,9 @@ public class SocketComm {
 				System.out.println("Height : " + height);
 
 				error = 0;
-
+			/*
+			 * 통신 에러 발생 소켓을 닫고 다시 열어서 통신을 반복한다
+			 */
 			} catch (Exception e) {
 				try {
 					OutputStream out = socket.getOutputStream();

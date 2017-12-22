@@ -18,7 +18,7 @@ public class Draw extends JPanel implements ActionListener {
 	int size = 0; //pathList size
 	
 	public void animateLine(Graphics2D g2d) {
-		list = Algoritm.getPathList();
+		list = Algorithm.getPathList();
 		if (b == 3)
 			size = list.size();
 		if (b < size)

@@ -3,9 +3,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.JFrame;
 
-//혼합 자바
-
-public class Algoritm extends SocketComm {
+public class Algorithm extends SocketComm {
 	public static ArrayList<Integer> penList = new ArrayList<Integer>();
 	public static ArrayList<P> Points = new ArrayList<P>();
 	public static ArrayList<Double> AngleList = new ArrayList<Double>();
@@ -36,6 +34,9 @@ public class Algoritm extends SocketComm {
 
 		input = FindVertex.pattern(SocketComm.getImgToArr());
 
+		/*
+		 * 테두리 부분은 찾을 수 없는 길로 표시를 하기 위해 모두 0으로 설정
+		 */
 		for (int c = 0; c < input.length; c++) {
 			for (int r = 0; r < input[0].length; r++) {
 				input[0][c] = 0;
@@ -45,24 +46,26 @@ public class Algoritm extends SocketComm {
 			}
 		}
 
-		x_length = ImageProcessing.getX_length();
-		y_length = ImageProcessing.getY_length();
+		x_length = ImageProcessing.getx_length();
+		y_length = ImageProcessing.gety_length();
 		xpixel_length = x_length / input[0].length;
 		ypixel_length = y_length / input.length;
-
+		
+		/*
+		 * 시뮬레이션의 크기와 나타나는 위치 지정
+		 */
 		Dimension dim = new Dimension(800, 800);
 
 		JFrame frame = new JFrame();
 		frame.setLocation(800, 0);
 		frame.setPreferredSize(dim);
 
-		i = marker1[0]; // x
-		j = marker1[1]; // y
-		System.out.println(i + " , " + j);
+		i = marker1[0]; // // 자동차가 현재 있는 x좌표
+		j = marker1[1]; // // 자동차가 현재 있는 y좌표
 		g = i;
 		h = j;
 
-		pen = 1;
+		pen = 1;//펜을 들고 이동
 		
 		pathList.add(pen);
 		pathList.add(i);
@@ -75,6 +78,9 @@ public class Algoritm extends SocketComm {
 				check_path++;
 			start(i, j, check_path);
 
+			/*
+			 * 더 가야할 지점이 있는지 확인
+			 */
 			for (int a = 1; a < input.length - 1; a++) {
 				for (int b = 1; b < input[0].length - 1; b++) {
 					if (input[a][b] != 0 && input[a][b] != 9) {
@@ -87,7 +93,6 @@ public class Algoritm extends SocketComm {
 				double angle = AngleList.get(a);
 				double preAngle = AngleList.get(a + 1);
 				int upPen = penList.get(a);
-				// System.out.println(angle + " / " + preAngle);
 				if (angle == preAngle) {
 					penList.remove(a);
 					Points.remove(a);
@@ -95,18 +100,7 @@ public class Algoritm extends SocketComm {
 					a--;
 				}
 			}
-
-			/*
-			 * String LastOutput = mArrayList.toString(); String LastOutput2; LastOutput2 =
-			 * LastOutput.replace("[", ""); LastOutput2 = LastOutput2.replace("]", "");
-			 * LastOutput2 = LastOutput2.replace(", ", "");
-			 * 
-			 * String date[] = LastOutput2.split("-");
-			 * 
-			 * for(int i=0 ; i< date.length ; i++) { System.out.println(date[i]); }
-			 * 
-			 * System.out.println(pathList);
-			 */
+			
 			if (finish_check == 0) {
 				control = false;
 			}
@@ -117,24 +111,14 @@ public class Algoritm extends SocketComm {
 		test.put("Angle", AngleList);
 		test.put("Width", input.length);
 		test.put("Height", input[0].length);
-
-		System.out.println(test.get("pen"));
-		System.out.println(test.get("Point"));
-		System.out.println(test.get("Angle"));
-
-		/*
-		 * for(int k = 0;k < input.length;k++) { for(int m = 0;m < input[0].length;m++)
-		 * System.out.print(input[k][m] + " "); System.out.println(""); }
-		 * System.out.println("");
-		 */
-		/*
-		 * System.out.println(pathList);
-		 */
 		Draw draw = new Draw();
 		frame.add(draw);
 		frame.pack();
 		frame.setVisible(true);
 
+		/*
+		 * 시뮬레이션이 종료 된 후 자동차를 움직이기 위해 설정
+		 */
 		synchronized (draw) {
 			try {
 				draw.wait();
@@ -143,8 +127,6 @@ public class Algoritm extends SocketComm {
 				e.printStackTrace();
 			}
 		}
-
-		System.out.println("최종");
 	}
 
 	public static double getXpixel_length() {
@@ -152,7 +134,7 @@ public class Algoritm extends SocketComm {
 	}
 
 	public static void setXpixel_length(double xpixel_length) {
-		Algoritm.xpixel_length = xpixel_length;
+		Algorithm.xpixel_length = xpixel_length;
 	}
 
 	public static double getYpixel_length() {
@@ -160,9 +142,12 @@ public class Algoritm extends SocketComm {
 	}
 
 	public static void setYpixel_length(double ypixel_length) {
-		Algoritm.ypixel_length = ypixel_length;
+		Algorithm.ypixel_length = ypixel_length;
 	}
 
+	/*
+	 * 펜을 들고 이동하는지 아닌지와 위치좌표를 리스트에 저장
+	 */
 	public static ArrayList<Integer> getPathList() {
 		for (int k = 0; k < Points.size(); k++) {
 			pathList.add((int) penList.get(k));
@@ -173,9 +158,12 @@ public class Algoritm extends SocketComm {
 	}
 
 	public static HashMap<String, Object> getHash() {
-		return Algoritm.test;
+		return Algorithm.test;
 	}
 
+	/*
+	 * 자동차의 초기 위치를 입력 받아서 시작하는 부분
+	 */
 	public static void start(int x, int y, int check_path) {
 		m = input.length;// 행의 길이
 		n = input[0].length;// 열의 길이
@@ -188,20 +176,20 @@ public class Algoritm extends SocketComm {
 		stack[0][2] = 0; // 마지막 움직인 방향
 		mov = 0;
 
-		MovePath(i, j, check_path);
+		MovePath(i, j, check_path);//다음 다야할 길을 찾는다
 
 		count = countloop(check_path);
 
 		while (count != 0) {
-			/*
-			 * System.out.println("떨어져 있는 길이 존재합니다.");
-			 */
-			minDistance(g, h, check_path);
+			minDistance(g, h, check_path);//최단 거리의 점을 찾아 간다
 
 			count = countloop(check_path);
 		}
 	}
 
+	/*
+	 * 가야할 지점이 있는지 체크
+	 */
 	public static int countloop(int check_path) {
 		int count = 0;
 
@@ -214,6 +202,9 @@ public class Algoritm extends SocketComm {
 		return count;
 	}
 
+	/*
+	 * 떨어져 있는 점중 최단 거리를 찾기
+	 */
 	public static void minDistance(int g, int h, int check_path) {
 		P StartP;
 		if (start_point == 0) {
@@ -223,8 +214,6 @@ public class Algoritm extends SocketComm {
 		else 
 			StartP = new P(i, j);
 		
-		System.out.println("시작 좌표값:(" + (int)StartP.x+","+ (int)StartP.y+")");
-		 
 		double min = 10000;
 
 		for (int a = 0; a < input.length; a++) {
@@ -240,14 +229,7 @@ public class Algoritm extends SocketComm {
 			}
 		}
 		double getangle = getAngle((int) StartP.y, (int) StartP.x, (int) nextP.y, (int) nextP.x);
-		/*
-		 * System.out.println("point : (" + (int)nextP.x + "," + (int)nextP.y +")");
-		 * System.out.println("최소  dist: "+ Math.round(min) + "   각도 : "+ getangle +
-		 * "도");
-		 * System.out.println("펜을 들고("+(int)StartP.x+","+(int)StartP.y+") > ("+(int)
-		 * nextP.x+","+(int)nextP.y+")로 이동"); System.out.println("");
-		 */
-
+		
 		P pointA = new P(nextP.y, nextP.x);
 		pen = 1;
 		arrayOutput(pen, pointA, getangle);
@@ -268,6 +250,9 @@ public class Algoritm extends SocketComm {
 		AngleList.add(degree);
 	}
 
+	/*
+	 * 이동 후 다음 위치를 현재위치로 바꿔주고 이동 각도 등을 계산한다
+	 */
 	public static void DirectionCheck(int col, int row, int direct, int c) {
 		double newdegree;
 
@@ -285,35 +270,23 @@ public class Algoritm extends SocketComm {
 			P q = new P(i, j);
 			P w = new P(g, h);
 			double di = distance(q, w);
-			/*
-			 * if(di > Math.sqrt(2)) {
-			 * System.out.println("펜을 들고("+i+","+j+") > ("+g+","+h+")로 이동");
-			 * System.out.println(""); }
-			 * 
-			 * System.out.println("("+i+","+j+") > ("+g+","+h+")");
-			 */
 
 			P startP = new P(j, i);
 			P points = new P(h, g);
 
 			newdegree = getAngle(j, i, h, g);
 
-			// System.out.println(newdegree+"도");
 			P pointB = new P(h, g);
 			arrayOutput(pen, pointB, newdegree);
 
 			i = g;
 			j = h;
-
-			/*
-			 * for(int k = 0;k < input.length;k++) { for(int m = 0;m < input[0].length;m++)
-			 * System.out.print(input[k][m] + " "); System.out.println(""); }
-			 * System.out.println("");
-			 */
-
 		}
 	}
 
+	/*
+	 * 8방향중 어떤 방향으로 움직일지 결정
+	 */
 	public static void MovePath(int col, int row, int checkpath) {
 		int movedirect = 0;
 		pen = 0;
@@ -344,55 +317,53 @@ public class Algoritm extends SocketComm {
 		mov = 0;
 
 		if (input[col + 1][row] == checkpath) {
-			// System.out.println("+0");
 			DirectionCheck(col, row, movedirect, 0);
 			MovePath(i, j, checkpath);
 		}
 		movedirect++;
 		if (input[col][row + 1] == checkpath) {
-			// System.out.println("0+");
 			DirectionCheck(col, row, movedirect, 0);
 			MovePath(i, j, checkpath);
 		}
 		movedirect++;
 		if (input[col - 1][row] == checkpath) {
-			// System.out.println("-0");
 			DirectionCheck(col, row, movedirect, 0);
 			MovePath(i, j, checkpath);
 		}
 		movedirect++;
 		if (input[col][row - 1] == checkpath) {
-			// System.out.println("0-");
 			DirectionCheck(col, row, movedirect, 0);
 			MovePath(i, j, checkpath);
 		}
 		movedirect++;
 		if (input[col + 1][row + 1] == checkpath) {
-			// System.out.println("++");
 			DirectionCheck(col, row, movedirect, 0);
 			MovePath(i, j, checkpath);
 		}
 		movedirect++;
 		if (input[col + 1][row - 1] == checkpath) {
-			// System.out.println("-+");
+			/*
+			 * 두 지점 사이의 각도 계산
+			 */
 			DirectionCheck(col, row, movedirect, 0);
 			MovePath(i, j, checkpath);
 		}
 		movedirect++;
 		if (input[col - 1][row - 1] == checkpath) {
-			// System.out.println("--");
 			DirectionCheck(col, row, movedirect, 0);
 			MovePath(i, j, checkpath);
 		}
 		movedirect++;
 		if (input[col - 1][row + 1] == checkpath) {
-			// System.out.println("+-");
 			DirectionCheck(col, row, movedirect, 0);
 			MovePath(i, j, checkpath);
 		}
 		pen = 1;
 	}
 
+	/*
+	 * 두 지점 사이의 각도 계산
+	 */
 	private static double getAngle(int x1, int y1, int x2, int y2) {
 		double dx = x2 - x1;
 		double dy = y2 - y1;

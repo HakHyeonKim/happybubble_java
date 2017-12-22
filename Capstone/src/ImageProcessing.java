@@ -132,8 +132,8 @@ public class ImageProcessing {
 	 * 경로 정보를 받아 온다.
 	 */	
 	public static void getPathInfo() {
-		Algoritm.Algo(car_marker);
-		path = Algoritm.getHash();
+		Algorithm.Algo(car_marker);
+		path = Algorithm.getHash();
 		pen_list = (ArrayList<Integer>) path.get("pen");
 		Points = (ArrayList<P>) path.get("Point");
 		angle_list = (ArrayList<Double>) path.get("Angle");
